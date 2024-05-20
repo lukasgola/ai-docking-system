@@ -2,6 +2,8 @@
 import pygame
 import sys
 import math
+import time
+import random
 import pandas as pd
 
 # Initialize Pygame
@@ -27,8 +29,8 @@ blue = (0, 0, 255)
 # Player settings
 player_size = 50
 player_pos = [screen_width - 50, screen_height - 50]
-player_speed = 5
-player_angle = -45
+player_speed = 0
+player_angle = -90
 
 # L-shaped wall dimensions and position
 wall_thickness = 20
@@ -104,6 +106,16 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+            
+        if event.type == pygame.JOYAXISMOTION:
+            analog_keys[event.axis] = event.value
+        
+        if event.type == pygame.JOYBUTTONDOWN:
+            if event.button == 12:
+                df = pd.DataFrame(rekord, columns=['d1', 'd2', 'd3', 'player_angle', 'player_speed'])
+                df.to_excel('record.xlsx')
+                print("Zapisano")
+
 
     original_pos = player_pos[:]
     original_angle = player_angle
@@ -113,34 +125,23 @@ while running:
     
     player_pos[0] += player_speed * math.sin(math.radians(player_angle))
     player_pos[1] -= player_speed * math.cos(math.radians(player_angle))
+    
+    # Horizontal Analog
+    if analog_keys[0] < -0.3:
+        player_angle -= abs(analog_keys[0]) * 2  # Adjust sensitivity by multiplying
 
-    if keys[pygame.K_w]:
-        player_speed = 8
-        #player_pos[0] += player_speed * math.sin(math.radians(player_angle))
-        #player_pos[1] -= player_speed * math.cos(math.radians(player_angle))
+    if analog_keys[0] > 0.3:
+        player_angle += abs(analog_keys[0]) * 2  # Adjust sensitivity by multiplying
+        
+    # Forward backward
+    if analog_keys[5] > -1:
+        player_speed = (analog_keys[5] + 1) * 2
+    elif analog_keys[4] > -1:  # Left trigger (typically axis 4)
+        player_speed = -(analog_keys[4] + 1) * 2  # Map from [-1, 1] to [0, -10]
     else:
-        player_speed = 5
-    if keys[pygame.K_s]:
-        player_speed = 2
-        #player_pos[0] -= player_speed * math.sin(math.radians(player_angle))
-        #player_pos[1] += player_speed * math.cos(math.radians(player_angle))
-    if keys[pygame.K_a]:
-        player_angle -= 2
-        player_speed = 3
-    elif keys[pygame.K_d]:
-        player_angle += 2
-        player_speed = 3
-    else:
-        player_speed = 5
-    if keys[pygame.K_SPACE]:
-        player_pos = [screen_width - 50, screen_height - 50]
-        player_angle = -45
-        player_speed = 5
-        finish = False
-    if keys[pygame.K_RETURN]:
-        # zapisanie zebranych danych
-        df = pd.DataFrame(rekord, columns=['d1', 'd2', 'd3', 'player_angle', 'player_speed'])
-        df.to_excel('record.xlsx')
+        player_speed = 1
+
+
 
     # Define the player rectangle corners
     half_size = player_size // 2
@@ -210,14 +211,23 @@ while running:
     if check_collision(player_rect, [horizontal_wall, vertical_wall]):
         player_pos = original_pos
         player_angle = original_angle
-
-
+        
     
-    rekord.append([distance_left, distance_right, distance_bottom_left, player_angle, player_speed])
+    rekord.append([distance_left, distance_right, distance_bottom_left, int(player_angle), int(player_speed)])
+
 
     # Display "FINISH" if in parking spot
     if finish:
         player_speed = 0
+        for i in range(100):
+            rekord.append([distance_left, distance_right, distance_bottom_left, int(player_angle), int(player_speed)])
+            time.sleep(0.01)
+    
+        player_pos = [screen_width - random.randint(0, 300), screen_height - random.randint(0, 300)]
+        player_speed = 1
+        player_angle = -45
+        finish = False
+        
         #text = font.render('FINISH', True, white)
         #screen.blit(text, (screen_width // 2 - text.get_width() // 2, screen_height // 2 - text.get_height() // 2))
         
@@ -249,7 +259,7 @@ df = pd.read_excel('record.xlsx')
 X = df[['d1','d2','d3']].to_numpy()
 y = df[['player_speed']].to_numpy()
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,  random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1,  random_state=42)
 
 
 from sklearn.tree import DecisionTreeRegressor
@@ -274,7 +284,7 @@ plt.show()
 X = df[['d1','d2','d3']].to_numpy()
 y = df[['player_angle']].to_numpy()
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,  random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1,  random_state=42)
 
 
 from sklearn.tree import DecisionTreeRegressor
@@ -299,6 +309,7 @@ import pygame
 import sys
 import math
 import pandas as pd
+import random
 
 # Initialize Pygame
 pygame.init()
@@ -324,7 +335,7 @@ blue = (0, 0, 255)
 player_size = 50
 player_pos = [screen_width - 50, screen_height - 50]
 player_speed = 0
-player_angle = 0
+player_angle = -45
 
 # L-shaped wall dimensions and position
 wall_thickness = 20
@@ -335,6 +346,17 @@ vertical_wall = pygame.Rect(10, 10, wall_thickness, screen_height)
 parking_size = 100
 parking_pos = [80, 80]  # Top-left corner of the parking spot
 parking_rect = pygame.Rect(parking_pos[0], parking_pos[1], parking_size, parking_size)
+
+#PS4
+joystick = pygame.joystick.Joystick(0)
+joystick.init()
+
+print(f"Joystick name: {joystick.get_name()}")
+print(f"Number of axes: {joystick.get_numaxes()}")
+print(f"Number of buttons: {joystick.get_numbuttons()}")
+
+LEFT, RIGHT, UP, DOWN = False, False, False, False
+analog_keys = {0:0, 1:0, 2:0, 3:0, 4:-1, 5: -1 }
 
 # Game loop
 running = True
@@ -386,6 +408,15 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+            
+        if event.type == pygame.JOYAXISMOTION:
+            analog_keys[event.axis] = event.value
+        
+        if event.type == pygame.JOYBUTTONDOWN:
+            if event.button == 11:
+                finish = False
+                player_pos = [screen_width - random.randint(0, 300), screen_height - random.randint(0, 300)]
+                
 
     original_pos = player_pos[:]
     original_angle = player_angle
@@ -475,21 +506,18 @@ while running:
 
     # Check for collisions
     if check_collision(player_rect, [horizontal_wall, vertical_wall]):
-        player_pos = original_pos
-        player_angle = original_angle
-
+        player_pos = [screen_width - random.randint(0, 300), screen_height - random.randint(0, 300)]
+        #player_pos = original_pos
+        #player_angle = original_angle
 
     
-    rekord.append([distance_left, distance_right, distance_bottom_left, player_angle, player_pos[0], player_pos[1]])
+        
 
     # Display "FINISH" if in parking spot
     if finish:
-        #player_pos = [screen_width - 50, screen_height - 50]
-        #player_angle = -45
-        #finish = False
-        #player_speed = 0
         text = font.render('FINISH', True, white)
         screen.blit(text, (screen_width // 2 - text.get_width() // 2, screen_height // 2 - text.get_height() // 2))
+        
         
 
     # Update display
