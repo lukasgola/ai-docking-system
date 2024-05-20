@@ -101,18 +101,31 @@ while running:
     player_pos[1] -= player_speed * math.cos(math.radians(player_angle))
 
     if keys[pygame.K_w]:
-        player_pos[0] += player_speed * math.sin(math.radians(player_angle))
-        player_pos[1] -= player_speed * math.cos(math.radians(player_angle))
+        player_speed = 8
+        #player_pos[0] += player_speed * math.sin(math.radians(player_angle))
+        #player_pos[1] -= player_speed * math.cos(math.radians(player_angle))
+    else:
+        player_speed = 5
     if keys[pygame.K_s]:
-        player_pos[0] -= player_speed * math.sin(math.radians(player_angle))
-        player_pos[1] += player_speed * math.cos(math.radians(player_angle))
+        player_speed = 2
+        #player_pos[0] -= player_speed * math.sin(math.radians(player_angle))
+        #player_pos[1] += player_speed * math.cos(math.radians(player_angle))
     if keys[pygame.K_a]:
-        player_angle -= 1
-    if keys[pygame.K_d]:
+        player_angle -= 2
+        player_speed = 3
+    elif keys[pygame.K_d]:
         player_angle += 2
+        player_speed = 3
+    else:
+        player_speed = 5
+    if keys[pygame.K_SPACE]:
+        player_pos = [screen_width - 50, screen_height - 50]
+        player_angle = -45
+        player_speed = 5
+        finish = False
     if keys[pygame.K_RETURN]:
         # zapisanie zebranych danych
-        df = pd.DataFrame(rekord, columns=['d1', 'd2', 'd3', 'player_angle', 'pos_x', 'pos_y'])
+        df = pd.DataFrame(rekord, columns=['d1', 'd2', 'd3', 'player_angle', 'player_speed'])
         df.to_excel('record.xlsx')
 
     # Define the player rectangle corners
@@ -186,13 +199,11 @@ while running:
 
 
     
-    rekord.append([distance_left, distance_right, distance_bottom_left, player_angle, int(player_pos[0]), int(player_pos[1])])
+    rekord.append([distance_left, distance_right, distance_bottom_left, player_angle, player_speed])
 
     # Display "FINISH" if in parking spot
     if finish:
-        player_pos = [screen_width - 50, screen_height - 50]
-        player_angle = -45
-        finish = False
+        player_speed = 0
         #text = font.render('FINISH', True, white)
         #screen.blit(text, (screen_width // 2 - text.get_width() // 2, screen_height // 2 - text.get_height() // 2))
         
@@ -218,53 +229,28 @@ df = pd.read_excel('record.xlsx')
 
 
 # 
-# Model model_X
+# Model model_S
 # 
 
 X = df[['d1','d2','d3']].to_numpy()
-y = df[['pos_x']].to_numpy()
+y = df[['player_speed']].to_numpy()
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,  random_state=42)
 
 
 from sklearn.tree import DecisionTreeRegressor
 
-model_X = DecisionTreeRegressor()
+model_S = DecisionTreeRegressor()
 
-model_X.fit(X_train,y_train)
-
-
-y_predict = model_X.predict(X_test)
-
-import matplotlib.pyplot as plt
-
-plt.plot(y_test, y_predict,'.')
-plt.title("model_X")
-plt.show()
-
-# 
-# Model model_Y
-# 
-
-X = df[['d1','d2','d3']].to_numpy()
-y = df[['pos_y']].to_numpy()
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,  random_state=42)
+model_S.fit(X_train,y_train)
 
 
-from sklearn.tree import DecisionTreeRegressor
-
-model_Y = DecisionTreeRegressor()
-
-model_Y.fit(X_train,y_train)
-
-
-y_predict = model_Y.predict(X_test)
+y_predict = model_S.predict(X_test)
 
 import matplotlib.pyplot as plt
 
 plt.plot(y_test, y_predict,'.')
-plt.title("model_Y")
+plt.title("model_S")
 plt.show()
 
 # 
@@ -323,7 +309,7 @@ blue = (0, 0, 255)
 # Player settings
 player_size = 50
 player_pos = [screen_width - 50, screen_height - 50]
-player_speed = 5
+player_speed = 0
 player_angle = 0
 
 # L-shaped wall dimensions and position
@@ -419,14 +405,16 @@ while running:
     distance_text_bottom_left = small_font.render(f'{distance_bottom_left:.2f}', True, blue)
     screen.blit(distance_text_bottom_left, end_point_bottom_left)
     
+    
     player_angle = int(model_A.predict([[distance_left, distance_right, distance_bottom_left]]))
+    player_speed = int(model_S.predict([[distance_left, distance_right, distance_bottom_left]]))
+    
     player_pos[0] += player_speed * math.sin(math.radians(player_angle))
     player_pos[1] -= player_speed * math.cos(math.radians(player_angle))
     
-    
     #print(int(model_X.predict([[distance_left, distance_right, distance_bottom_left]])))
     #print(int(model_Y.predict([[distance_left, distance_right, distance_bottom_left]])))
-    print(int(model_Y.predict([[distance_left, distance_right, distance_bottom_left]])))
+    #print(int(model_Y.predict([[distance_left, distance_right, distance_bottom_left]])))
     
     
     #player_pos[0] = int(model_X.predict([[distance_left, distance_right, distance_bottom_left]]))
@@ -485,7 +473,7 @@ while running:
         #player_pos = [screen_width - 50, screen_height - 50]
         #player_angle = -45
         #finish = False
-        player_speed = 0
+        #player_speed = 0
         text = font.render('FINISH', True, white)
         screen.blit(text, (screen_width // 2 - text.get_width() // 2, screen_height // 2 - text.get_height() // 2))
         
