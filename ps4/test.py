@@ -78,9 +78,9 @@ while running:
 
     if forSpeed == 0 and backSpeed == 0:
         speedR = int(speed * axL)
-        speedL = int(- speed * axL)
-        backR = int(- speed * axR)
-        backL = int(speed * axR)
+        speedL = int(speed * axR)
+        backR = int(speed * axR)
+        backL = int(speed * axL)
 
     else:
         speedR = int(forSpeed + forSpeed * axL)

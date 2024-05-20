@@ -48,6 +48,20 @@ finish = False
 # Zmienna do zapisu danych
 rekord = []
 
+
+#PS4
+joystick = pygame.joystick.Joystick(0)
+joystick.init()
+
+print(f"Joystick name: {joystick.get_name()}")
+print(f"Number of axes: {joystick.get_numaxes()}")
+print(f"Number of buttons: {joystick.get_numbuttons()}")
+
+LEFT, RIGHT, UP, DOWN = False, False, False, False
+analog_keys = {0:0, 1:0, 2:0, 3:0, 4:-1, 5: -1 }
+
+
+
 def rotate_point(point, angle, origin):
     angle_rad = math.radians(angle)
     ox, oy = origin
