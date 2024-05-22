@@ -96,32 +96,35 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
+            
         if event.type == pygame.JOYAXISMOTION:
             analog_keys[event.axis] = event.value
+    
+
 
     original_pos = player_pos[:]
     original_angle = player_angle
-
+    
+    # Get keys pressed
+    keys = pygame.key.get_pressed()
+    
+    player_pos[0] += player_speed * math.sin(math.radians(player_angle))
+    player_pos[1] -= player_speed * math.cos(math.radians(player_angle))
+    
     # Horizontal Analog
     if analog_keys[0] < -0.3:
-        player_angle -= abs(analog_keys[0]) * 5  # Adjust sensitivity by multiplying
+        player_angle -= abs(analog_keys[0]) * 2  # Adjust sensitivity by multiplying
 
     if analog_keys[0] > 0.3:
-        player_angle += abs(analog_keys[0]) * 5  # Adjust sensitivity by multiplying
+        player_angle += abs(analog_keys[0]) * 2  # Adjust sensitivity by multiplying
         
     # Forward backward
     if analog_keys[5] > -1:
-        player_speed = (analog_keys[5] + 1)*5
-        print(analog_keys[5])
+        player_speed = (analog_keys[5] + 1) * 2
     elif analog_keys[4] > -1:  # Left trigger (typically axis 4)
-        player_speed = -(analog_keys[4] + 1) * 5  # Map from [-1, 1] to [0, -10]
+        player_speed = -(analog_keys[4] + 1) * 2  # Map from [-1, 1] to [0, -10]
     else:
-        player_speed = 0
-
-    # Update player position based on speed and angle
-    player_pos[0] += player_speed * math.cos(math.radians(player_angle))
-    player_pos[1] += player_speed * math.sin(math.radians(player_angle))
+        player_speed = 1
 
     # Define the player rectangle corners
     half_size = player_size // 2
