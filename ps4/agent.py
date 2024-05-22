@@ -21,7 +21,7 @@ class Agent:
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = Linear_QNet(8, 256, 3)
+        self.model = Linear_QNet(11, 256, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
 
@@ -30,28 +30,48 @@ class Agent:
         player_pos = game.player_pos
         parking_pos = game.parking_pos
         player_angle = game.player_angle
+        player_size = game.player_size
 
         d1 = game.d1
         d2 = game.d2
         d3 = game.d3
 
+        half_size = player_size // 2
+        point_r = [player_pos[0] + half_size, player_pos[1]]
+        point_l = [player_pos[0] - half_size, player_pos[1]]
+        point_u = [player_pos[0], player_pos[1] + half_size]
+        point_d = [player_pos[0], player_pos[1] - half_size]
+
         dir_u = player_angle % 360 >= -45 and player_angle % 360 < 45
         dir_r = player_angle % 360 >= 45 and player_angle % 360 < 135
-        dir_b = player_angle % 360 >= 135 and player_angle % 360 < 45
+        dir_d = player_angle % 360 >= 135 and player_angle % 360 < 45
         dir_l = player_angle % 360 > -45 and player_angle % 360 < 45
 
 
         state = [
-            # Danger straight
-            #(d2 < 50 or d3 < 50),
+            
+             # Danger straight
+            (dir_r and game.check_collision(point_r)) or 
+            (dir_l and game.check_collision(point_l)) or 
+            (dir_u and game.check_collision(point_u)) or 
+            (dir_d and game.check_collision(point_d)),
+
+            # Danger right
+            (dir_u and game.check_collision(point_r)) or 
+            (dir_d and game.check_collision(point_l)) or 
+            (dir_l and game.check_collision(point_u)) or 
+            (dir_r and game.check_collision(point_d)),
 
             # Danger left
-            #(d1 < 50),
+            (dir_d and game.check_collision(point_r)) or 
+            (dir_u and game.check_collision(point_l)) or 
+            (dir_r and game.check_collision(point_u)) or 
+            (dir_l and game.check_collision(point_d)),
 
             # Move direction
             dir_u,
             dir_r,
-            dir_b,
+            dir_d,
             dir_l,
 
             parking_pos[0] < player_pos[0], # parking left

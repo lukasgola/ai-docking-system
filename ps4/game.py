@@ -74,6 +74,13 @@ class AGV:
                 return True
         return False
     
+    def check_collision(self, point):
+        for wall in [self.horizontal_wall, self.vertical_wall, self.horizontal_wall2, self.vertical_wall2]:
+            if wall.collidepoint(point):
+                return True
+        return False
+
+    
 
     def is_in_parking_spot(self, points, parking_rect):
         for point in points:
@@ -204,7 +211,7 @@ class AGV:
             reward = 10
             self.score += 1
             game_over = True
-            self.reset()
+            #self.reset()
             text = self.font.render('FINISH', True, self.white)
             self.screen.blit(text, (self.screen_width // 2 - text.get_width() // 2, self.screen_height // 2 - text.get_height() // 2))
 
