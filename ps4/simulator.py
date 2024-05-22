@@ -38,7 +38,7 @@ horizontal_wall = pygame.Rect(10, 10, screen_width, wall_thickness)
 vertical_wall = pygame.Rect(10, 10, wall_thickness, screen_height)
 
 # Parking spot settings
-parking_size = 100
+parking_size = 120
 parking_pos = [80, 80]  # Top-left corner of the parking spot
 parking_rect = pygame.Rect(parking_pos[0], parking_pos[1], parking_size, parking_size)
 
@@ -49,6 +49,9 @@ finish = False
 
 # Zmienna do zapisu danych
 rekord = []
+
+# Licznik
+counter = 0
 
 
 #PS4
@@ -112,8 +115,8 @@ while running:
         
         if event.type == pygame.JOYBUTTONDOWN:
             if event.button == 12:
-                df = pd.DataFrame(rekord, columns=['d1', 'd2', 'd3', 'player_angle', 'player_speed'])
-                df.to_excel('record.xlsx')
+                df = pd.DataFrame(rekord, columns=['d1', 'd2', 'd3', 'player_angle', 'player_speed', 'd1_d2'])
+                df.to_excel('record3.xlsx')
                 print("Zapisano")
 
 
@@ -206,6 +209,10 @@ while running:
     for i, text in enumerate(distances_text):
         distance_text = small_font.render(text, True, white)
         screen.blit(distance_text, (screen_width - distance_text.get_width() - 10, 50 + i * 20))
+        
+    # Display counter
+    distance_counter = small_font.render(str(counter), True, white)
+    screen.blit(distance_counter, (screen_width - distance_text.get_width() - 10, 50 + 5 * 20))
 
     # Check for collisions
     if check_collision(player_rect, [horizontal_wall, vertical_wall]):
@@ -213,19 +220,20 @@ while running:
         player_angle = original_angle
         
     
-    rekord.append([distance_left, distance_right, distance_bottom_left, int(player_angle), int(player_speed)])
+    rekord.append([distance_left, distance_right, distance_bottom_left, int(player_angle), int(player_speed), distance_left - distance_right ])
 
 
     # Display "FINISH" if in parking spot
     if finish:
+        counter += 1
         player_speed = 0
         for i in range(100):
-            rekord.append([distance_left, distance_right, distance_bottom_left, int(player_angle), int(player_speed)])
+            rekord.append([distance_left, distance_right, distance_bottom_left, int(player_angle), int(player_speed), distance_left - distance_right])
             time.sleep(0.01)
     
-        player_pos = [screen_width - random.randint(0, 300), screen_height - random.randint(0, 300)]
+        player_pos = [screen_width - 50, screen_height - 50]
         player_speed = 1
-        player_angle = -45
+        player_angle = -90
         finish = False
         
         #text = font.render('FINISH', True, white)
@@ -249,14 +257,14 @@ sys.exit()
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-df = pd.read_excel('record.xlsx')
+df = pd.read_excel('record3.xlsx')
 
 
 # 
 # Model model_S
 # 
 
-X = df[['d1','d2','d3']].to_numpy()
+X = df[['d1','d2','d3', 'd1_d2']].to_numpy()
 y = df[['player_speed']].to_numpy()
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1,  random_state=42)
@@ -281,10 +289,10 @@ plt.show()
 # Model model_A
 # 
 
-X = df[['d1','d2','d3']].to_numpy()
+X = df[['d1','d2','d3', 'd1_d2']].to_numpy()
 y = df[['player_angle']].to_numpy()
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1,  random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.9,  random_state=42)
 
 
 from sklearn.tree import DecisionTreeRegressor
@@ -343,7 +351,7 @@ horizontal_wall = pygame.Rect(10, 10, screen_width, wall_thickness)
 vertical_wall = pygame.Rect(10, 10, wall_thickness, screen_height)
 
 # Parking spot settings
-parking_size = 100
+parking_size = 120
 parking_pos = [80, 80]  # Top-left corner of the parking spot
 parking_rect = pygame.Rect(parking_pos[0], parking_pos[1], parking_size, parking_size)
 
@@ -415,7 +423,9 @@ while running:
         if event.type == pygame.JOYBUTTONDOWN:
             if event.button == 11:
                 finish = False
-                player_pos = [screen_width - random.randint(0, 300), screen_height - random.randint(0, 300)]
+                player_pos = [screen_width - 50, screen_height - 50]
+                #player_pos = [screen_width - random.randint(0, 100), screen_height - random.randint(0, 100)]
+                player_angle = -90
                 
 
     original_pos = player_pos[:]
@@ -451,8 +461,8 @@ while running:
     screen.blit(distance_text_bottom_left, end_point_bottom_left)
     
     
-    player_angle = int(model_A.predict([[distance_left, distance_right, distance_bottom_left]]))
-    player_speed = int(model_S.predict([[distance_left, distance_right, distance_bottom_left]]))
+    player_angle = int(model_A.predict([[int(distance_left), int(distance_right), int(distance_bottom_left), distance_left - distance_right ]]))
+    player_speed = int(model_S.predict([[int(distance_left), int(distance_right), int(distance_bottom_left), distance_left - distance_right]]))
     
     player_pos[0] += player_speed * math.sin(math.radians(player_angle))
     player_pos[1] -= player_speed * math.cos(math.radians(player_angle))
@@ -506,9 +516,9 @@ while running:
 
     # Check for collisions
     if check_collision(player_rect, [horizontal_wall, vertical_wall]):
-        player_pos = [screen_width - random.randint(0, 300), screen_height - random.randint(0, 300)]
+        player_pos = [screen_width - random.randint(0, 100), screen_height - random.randint(0, 100)]
         #player_pos = original_pos
-        #player_angle = original_angle
+        player_angle = -90
 
     
         
