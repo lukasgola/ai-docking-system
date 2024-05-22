@@ -115,7 +115,7 @@ while running:
         
         if event.type == pygame.JOYBUTTONDOWN:
             if event.button == 12:
-                df = pd.DataFrame(rekord, columns=['d1', 'd2', 'd3', 'player_angle', 'player_speed', 'd1_d2'])
+                df = pd.DataFrame(rekord, columns=['d1', 'd2', 'd3', 'player_angle', 'player_speed'])
                 df.to_excel('record3.xlsx')
                 print("Zapisano")
 
@@ -220,7 +220,7 @@ while running:
         player_angle = original_angle
         
     
-    rekord.append([distance_left, distance_right, distance_bottom_left, int(player_angle), int(player_speed), distance_left - distance_right ])
+    rekord.append([distance_left, distance_right, distance_bottom_left, int(player_angle), int(player_speed) ])
 
 
     # Display "FINISH" if in parking spot
@@ -257,17 +257,17 @@ sys.exit()
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-df = pd.read_excel('record3.xlsx')
+df = pd.read_excel('record2.xlsx')
 
 
 # 
 # Model model_S
 # 
 
-X = df[['d1','d2','d3', 'd1_d2']].to_numpy()
+X = df[['d1','d2','d3']].to_numpy()
 y = df[['player_speed']].to_numpy()
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1,  random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,  random_state=42)
 
 
 from sklearn.tree import DecisionTreeRegressor
@@ -289,10 +289,10 @@ plt.show()
 # Model model_A
 # 
 
-X = df[['d1','d2','d3', 'd1_d2']].to_numpy()
+X = df[['d1','d2','d3']].to_numpy()
 y = df[['player_angle']].to_numpy()
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.9,  random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,  random_state=42)
 
 
 from sklearn.tree import DecisionTreeRegressor
@@ -343,7 +343,7 @@ blue = (0, 0, 255)
 player_size = 50
 player_pos = [screen_width - 50, screen_height - 50]
 player_speed = 0
-player_angle = -45
+player_angle = -90
 
 # L-shaped wall dimensions and position
 wall_thickness = 20
@@ -461,8 +461,8 @@ while running:
     screen.blit(distance_text_bottom_left, end_point_bottom_left)
     
     
-    player_angle = int(model_A.predict([[int(distance_left), int(distance_right), int(distance_bottom_left), distance_left - distance_right ]]))
-    player_speed = int(model_S.predict([[int(distance_left), int(distance_right), int(distance_bottom_left), distance_left - distance_right]]))
+    player_angle = int(model_A.predict([[int(distance_left), int(distance_right), int(distance_bottom_left) ]]))
+    player_speed = int(model_S.predict([[int(distance_left), int(distance_right), int(distance_bottom_left)]]))
     
     player_pos[0] += player_speed * math.sin(math.radians(player_angle))
     player_pos[1] -= player_speed * math.cos(math.radians(player_angle))
@@ -516,7 +516,7 @@ while running:
 
     # Check for collisions
     if check_collision(player_rect, [horizontal_wall, vertical_wall]):
-        player_pos = [screen_width - random.randint(0, 100), screen_height - random.randint(0, 100)]
+        player_pos = [screen_width - random.randint(0, 50), screen_height - random.randint(0, 50)]
         #player_pos = original_pos
         player_angle = -90
 
