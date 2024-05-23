@@ -32,20 +32,21 @@ class Agent:
         player_angle = game.player_angle
         player_size = game.player_size
 
-        d1 = game.d1
-        d2 = game.d2
-        d3 = game.d3
-
         half_size = player_size // 2
-        point_r = [player_pos[0] + player_size, player_pos[1]]
-        point_l = [player_pos[0] - player_size, player_pos[1]]
-        point_u = [player_pos[0], player_pos[1] + player_size]
-        point_d = [player_pos[0], player_pos[1] - player_size]
+        point_r = [player_pos[0] + half_size, player_pos[1]]
+        point_l = [player_pos[0] - half_size, player_pos[1]]
+        point_u = [player_pos[0], player_pos[1] + half_size]
+        point_d = [player_pos[0], player_pos[1] - half_size]
 
-        dir_u = player_angle % 360 >= 315 and player_angle % 360 < 45
-        dir_r = player_angle % 360 >= 45 and player_angle % 360 < 135
-        dir_d = player_angle % 360 >= 135 and player_angle % 360 < 225
-        dir_l = player_angle % 360 >= 225 and player_angle % 360 < 315
+        point_r = game.rotate_point(point_r, player_angle, player_pos)
+        point_l = game.rotate_point(point_l, player_angle, player_pos)
+        point_u = game.rotate_point(point_u, player_angle, player_pos)
+        point_d = game.rotate_point(point_d, player_angle, player_pos)
+
+        dir_u = player_angle >= 315 and player_angle < 45
+        dir_r = player_angle >= 45 and player_angle  < 135
+        dir_d = player_angle >= 135 and player_angle < 225
+        dir_l = player_angle >= 225 and player_angle < 315
 
 
         state = [

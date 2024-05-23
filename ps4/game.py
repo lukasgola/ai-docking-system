@@ -45,7 +45,7 @@ class AGV:
         
         # Parking spot settings
         self.parking_size = 50
-        self.parking_pos = [200, 200]  # Top-left corner of the parking spot
+        self.parking_pos = [300, 300]  # Top-left corner of the parking spot
         self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
 
         # Score
@@ -90,7 +90,7 @@ class AGV:
         return False
     
     def new_parking_spot(self):
-        self.parking_pos = [random.randint(50, self.screen_width - 50), random.randint(50, self.screen_height - 50)]
+        self.parking_pos = [random.randint(50, self.screen_width - 500), random.randint(50, self.screen_height - 500)]
         self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
 
     def distance_to_wall(self, point, angle, walls):
