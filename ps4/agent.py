@@ -37,36 +37,36 @@ class Agent:
         d3 = game.d3
 
         half_size = player_size // 2
-        point_r = [player_pos[0] + half_size, player_pos[1]]
-        point_l = [player_pos[0] - half_size, player_pos[1]]
-        point_u = [player_pos[0], player_pos[1] + half_size]
-        point_d = [player_pos[0], player_pos[1] - half_size]
+        point_r = [player_pos[0] + player_size, player_pos[1]]
+        point_l = [player_pos[0] - player_size, player_pos[1]]
+        point_u = [player_pos[0], player_pos[1] + player_size]
+        point_d = [player_pos[0], player_pos[1] - player_size]
 
-        dir_u = player_angle % 360 >= -45 and player_angle % 360 < 45
+        dir_u = player_angle % 360 >= 315 and player_angle % 360 < 45
         dir_r = player_angle % 360 >= 45 and player_angle % 360 < 135
-        dir_d = player_angle % 360 >= 135 and player_angle % 360 < 45
-        dir_l = player_angle % 360 > -45 and player_angle % 360 < 45
+        dir_d = player_angle % 360 >= 135 and player_angle % 360 < 225
+        dir_l = player_angle % 360 >= 225 and player_angle % 360 < 315
 
 
         state = [
             
              # Danger straight
-            (dir_r and game.check_collision(point_r)) or 
-            (dir_l and game.check_collision(point_l)) or 
+            (dir_r and game.check_collision(point_u)) or 
+            (dir_l and game.check_collision(point_u)) or 
             (dir_u and game.check_collision(point_u)) or 
-            (dir_d and game.check_collision(point_d)),
+            (dir_d and game.check_collision(point_u)),
 
             # Danger right
             (dir_u and game.check_collision(point_r)) or 
-            (dir_d and game.check_collision(point_l)) or 
-            (dir_l and game.check_collision(point_u)) or 
-            (dir_r and game.check_collision(point_d)),
+            (dir_d and game.check_collision(point_r)) or 
+            (dir_l and game.check_collision(point_r)) or 
+            (dir_r and game.check_collision(point_r)),
 
             # Danger left
-            (dir_d and game.check_collision(point_r)) or 
+            (dir_d and game.check_collision(point_l)) or 
             (dir_u and game.check_collision(point_l)) or 
-            (dir_r and game.check_collision(point_u)) or 
-            (dir_l and game.check_collision(point_d)),
+            (dir_r and game.check_collision(point_l)) or 
+            (dir_l and game.check_collision(point_l)),
 
             # Move direction
             dir_u,

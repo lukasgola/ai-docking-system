@@ -3,6 +3,7 @@ import sys
 import math
 import random
 import numpy as np
+from enum import Enum
 
 class AGV:
     def __init__(self):
@@ -30,7 +31,7 @@ class AGV:
         # Player settings
         self.player_size = 50
         self.player_pos = [self.screen_width - 80, self.screen_height - 80]
-        self.player_speed = 1  # Speed is initially set to 0
+        self.player_speed = 2  # Speed is initially set to 0
         self.player_angle = 0
         self.turn_force = 1
         
@@ -43,8 +44,8 @@ class AGV:
 
         
         # Parking spot settings
-        self.parking_size = 200
-        self.parking_pos = [50, 50]  # Top-left corner of the parking spot
+        self.parking_size = 50
+        self.parking_pos = [200, 200]  # Top-left corner of the parking spot
         self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
 
         # Score
@@ -84,9 +85,13 @@ class AGV:
 
     def is_in_parking_spot(self, points, parking_rect):
         for point in points:
-            if not parking_rect.collidepoint(point):
-                return False
-        return True
+            if parking_rect.collidepoint(point):
+                return True
+        return False
+    
+    def new_parking_spot(self):
+        self.parking_pos = [random.randint(50, self.screen_width - 50), random.randint(50, self.screen_height - 50)]
+        self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
 
     def distance_to_wall(self, point, angle, walls):
         px, py = point
@@ -110,6 +115,7 @@ class AGV:
         self.player_pos = [self.screen_width - 100, self.screen_height - 100]
         self.player_angle = 0
 
+
     def move(self, action):
         if np.array_equal(action, [1, 0 ,0]):
             self.player_angle = self.player_angle  # no change
@@ -117,6 +123,9 @@ class AGV:
             self.player_angle += self.turn_force
         elif np.array_equal(action, [0, 0, 1]):  # turn left
             self.player_angle -= self.turn_force
+
+        # Ensure player_angle is always between 0 and 360
+        self.player_angle %= 360
 
         # Move the player
         self.player_pos[0] += self.player_speed * math.sin(math.radians(self.player_angle))
@@ -203,6 +212,7 @@ class AGV:
             self.score = 0
             game_over = True
             self.reset()
+            return reward, game_over, self.score
 
         # Display "FINISH" if in parking spot
         # Check if player is in parking spot
@@ -210,6 +220,7 @@ class AGV:
         if self.is_in_parking_spot(points, self.parking_rect):
             reward = 10
             self.score += 1
+            self.new_parking_spot()
             game_over = True
             #self.reset()
             text = self.font.render('FINISH', True, self.white)
