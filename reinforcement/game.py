@@ -223,8 +223,8 @@ class AGV:
             self.new_parking_spot()
             game_over = True
             #self.reset()
-            text = self.font.render('FINISH', True, self.white)
-            self.screen.blit(text, (self.screen_width // 2 - text.get_width() // 2, self.screen_height // 2 - text.get_height() // 2))
+            #text = self.font.render('FINISH', True, self.white)
+            #self.screen.blit(text, (self.screen_width // 2 - text.get_width() // 2, self.screen_height // 2 - text.get_height() // 2))
 
         # Update display
         pygame.display.flip()
