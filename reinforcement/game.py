@@ -15,7 +15,8 @@ class AGV:
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         pygame.display.set_caption('AVG Simulator')
         self.clock = pygame.time.Clock()
-        self.reset()
+        self.reset_player()
+        self.reset_spot()
         
         # Font settings
         self.font = pygame.font.SysFont(None, 55)
@@ -28,13 +29,6 @@ class AGV:
         self.green = (0, 255, 0)
         self.blue = (0, 0, 255)
         
-        # Player settings
-        self.player_size = 50
-        self.player_pos = [self.screen_width - 80, self.screen_height - 80]
-        self.player_speed = 2  # Speed is initially set to 0
-        self.player_angle = 0
-        self.turn_force = 1
-        
         # L-shaped wall dimensions and position
         self.wall_thickness = 20
         self.horizontal_wall = pygame.Rect(10, 10, self.screen_width, self.wall_thickness)
@@ -42,11 +36,6 @@ class AGV:
         self.horizontal_wall2 = pygame.Rect(10, self.screen_height - 30, self.screen_width, self.wall_thickness)
         self.vertical_wall2 = pygame.Rect(self.screen_width - 30, 10, self.wall_thickness, self.screen_height)
 
-        
-        # Parking spot settings
-        self.parking_size = 50
-        self.parking_pos = [300, 300]  # Top-left corner of the parking spot
-        self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
 
         # Score
         self.score = 0
@@ -60,6 +49,25 @@ class AGV:
         self.reward = 0
         self.running = True
         self.clock = pygame.time.Clock()
+
+    def reset_spot(self):
+        # Parking spot settings
+        self.parking_size = 200
+        self.parking_pos = [50, 50]  # Top-left corner of the parking spot
+        self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
+
+    def reset_player(self):
+        # Player settings
+        self.player_size = 50
+        self.player_pos = [self.screen_width - 80, self.screen_height - 80]
+        self.player_speed = 2  # Speed is initially set to 0
+        self.player_angle = 0
+        self.turn_force = 1
+
+    def reset_game(self):
+        self.reset_player()
+        self.reset_spot()
+        self.score = 0
 
     def rotate_point(self, point, angle, origin):
         angle_rad = math.radians(angle)
@@ -76,9 +84,8 @@ class AGV:
         return False
     
     def check_collision(self, point):
-        for wall in [self.horizontal_wall, self.vertical_wall, self.horizontal_wall2, self.vertical_wall2]:
-            if wall.collidepoint(point):
-                return True
+        if self.distance_to_wall(point, self.player_angle, [self.horizontal_wall, self.vertical_wall, self.horizontal_wall2, self.vertical_wall2]) < 50:
+            return True
         return False
 
     
@@ -88,10 +95,7 @@ class AGV:
             if parking_rect.collidepoint(point):
                 return True
         return False
-    
-    def new_parking_spot(self):
-        self.parking_pos = [random.randint(50, self.screen_width - 500), random.randint(50, self.screen_height - 500)]
-        self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
+
 
     def distance_to_wall(self, point, angle, walls):
         px, py = point
@@ -111,10 +115,6 @@ class AGV:
 
         return distance
 
-    def reset(self):
-        self.player_pos = [self.screen_width - 100, self.screen_height - 100]
-        self.player_angle = 0
-
 
     def move(self, action):
         if np.array_equal(action, [1, 0 ,0]):
@@ -125,11 +125,19 @@ class AGV:
             self.player_angle -= self.turn_force
 
         # Ensure player_angle is always between 0 and 360
-        self.player_angle %= 360
+        #self.player_angle = self.player_angle % 360
 
+        if self.player_angle < 0:
+            self.player_angle = max(-90, self.player_angle)
+        else:
+            self.player_angle = min(90, self.player_angle)
+
+       
         # Move the player
         self.player_pos[0] += self.player_speed * math.sin(math.radians(self.player_angle))
         self.player_pos[1] -= self.player_speed * math.cos(math.radians(self.player_angle))
+
+
 
     def play_step(self, action):
         for event in pygame.event.get():
@@ -194,11 +202,12 @@ class AGV:
         distances_text = [
             f'Top Left: {self.d2:.2f}',
             f'Top Right: {self.d3:.2f}',
-            f'Bottom Left: {self.d1:.2f}'
+            f'Bottom Left: {self.d1:.2f}',
+            f'Player Angle: {self.player_angle}'
         ]
         for i, text in enumerate(distances_text):
             distance_text = self.small_font.render(text, True, self.white)
-            self.screen.blit(distance_text, (self.screen_width - distance_text.get_width() - 10, 50 + i * 20))
+            self.screen.blit(distance_text, (self.screen_width - distance_text.get_width() - 40, 50 + i * 20))
 
         # Display score
         text = self.small_font.render("Score: " + str(self.score), True, self.white)
@@ -209,9 +218,7 @@ class AGV:
         # Check for collisions
         if self.is_collision(player_rect, [self.horizontal_wall, self.vertical_wall, self.horizontal_wall2, self.vertical_wall2]):
             reward = -10
-            self.score = 0
             game_over = True
-            self.reset()
             return reward, game_over, self.score
 
         # Display "FINISH" if in parking spot
@@ -220,9 +227,8 @@ class AGV:
         if self.is_in_parking_spot(points, self.parking_rect):
             reward = 10
             self.score += 1
-            self.new_parking_spot()
-            game_over = True
-            #self.reset()
+            #game_over = True
+            self.reset_player()
             #text = self.font.render('FINISH', True, self.white)
             #self.screen.blit(text, (self.screen_width // 2 - text.get_width() // 2, self.screen_height // 2 - text.get_height() // 2))
 

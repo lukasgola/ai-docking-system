@@ -18,10 +18,10 @@ class Agent:
     def __init__(self):
         
         self.n_games = 0
-        self.epsilon = 0 # randomness
+        self.epsilon = 0.5 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = Linear_QNet(11, 256, 3)
+        self.model = Linear_QNet(9, 256, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
 
@@ -56,18 +56,6 @@ class Agent:
             (dir_l and game.check_collision(point_u)) or 
             (dir_u and game.check_collision(point_u)) or 
             (dir_d and game.check_collision(point_u)),
-
-            # Danger right
-            (dir_u and game.check_collision(point_r)) or 
-            (dir_d and game.check_collision(point_r)) or 
-            (dir_l and game.check_collision(point_r)) or 
-            (dir_r and game.check_collision(point_r)),
-
-            # Danger left
-            (dir_d and game.check_collision(point_l)) or 
-            (dir_u and game.check_collision(point_l)) or 
-            (dir_r and game.check_collision(point_l)) or 
-            (dir_l and game.check_collision(point_l)),
 
             # Move direction
             dir_u,
@@ -145,7 +133,7 @@ def train():
 
         if done:
             # train the long memory
-            game.reset()
+            game.reset_game()
             agent.n_games += 1
             agent.train_long_memory()
 
