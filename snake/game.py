@@ -1,3 +1,7 @@
+# TODO
+# https://monidp.medium.com/self-driving-car-with-reinforcement-learning-in-unity-88458d13fcd1
+# https://towardsdatascience.com/do-you-want-to-train-a-simplified-self-driving-car-with-reinforcement-learning-be1263622e9e
+
 import pygame
 import random
 from enum import Enum
@@ -24,7 +28,7 @@ BLUE2 = (0, 100, 255)
 BLACK = (0,0,0)
 
 BLOCK_SIZE = 20
-SPEED = 20
+SPEED = 40
 
 class SnakeGameAI:
 
