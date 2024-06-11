@@ -18,10 +18,10 @@ class Agent:
     def __init__(self):
         
         self.n_games = 0
-        self.epsilon = 0.5 # randomness
+        self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = Linear_QNet(9, 256, 3)
+        self.model = Linear_QNet(6, 256, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
 
@@ -31,6 +31,10 @@ class Agent:
         parking_pos = game.parking_pos
         player_angle = game.player_angle
         player_size = game.player_size
+
+        d1 = game.d1
+        d2 = game.d2
+        d3 = game.d3
 
         half_size = player_size // 2
         point_r = [player_pos[0] + half_size, player_pos[1]]
@@ -50,23 +54,15 @@ class Agent:
 
 
         state = [
-            
-             # Danger straight
-            (dir_r and game.check_collision(point_u)) or 
-            (dir_l and game.check_collision(point_u)) or 
-            (dir_u and game.check_collision(point_u)) or 
-            (dir_d and game.check_collision(point_u)),
 
-            # Move direction
-            dir_u,
-            dir_r,
-            dir_d,
-            dir_l,
+            d1,
+            d2,
+            d3,
 
-            parking_pos[0] < player_pos[0], # parking left
-            parking_pos[0] > player_pos[0], # parking right
-            parking_pos[1] < player_pos[1], # parking up
-            parking_pos[1] > player_pos[1], # parking down
+            player_angle,
+            player_pos[0],
+            player_pos[1],
+
 
         ]
 
@@ -106,6 +102,7 @@ class Agent:
             move = torch.argmax(prediction).item()
             final_move[move] = 1
 
+        print(final_move)
         return final_move
 
 def train():
