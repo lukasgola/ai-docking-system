@@ -87,18 +87,49 @@ class GeneticAgent:
         best_individual = None
         best_score = float('-inf')
         population = self.initialize_population()
+        
         for generation in range(NUM_GENERATIONS):
+            # Evaluate the population
             scores = self.evaluate_population(population)
+            
+            # Debugging: Ensure population and scores have the same length
+            print(f"Generation {generation}: Population Size: {len(population)}, Scores Size: {len(scores)}")
+            
+            if len(population) != len(scores):
+                raise ValueError("Population size and scores size do not match.")
+            
+            # Select the best parents
             parents = self.select_parents(population, scores)
+            
+            # Generate offspring
             offspring = self.crossover(parents)
             offspring = self.mutate(offspring)
+            
+            # Update population
             population = parents + offspring
+            
+            # Ensure the new population size is correct
+            print(f"Generation {generation}: Population Size After Reproduction: {len(population)}")
+            
+            if len(population) != POPULATION_SIZE:
+                raise ValueError("Population size after reproduction does not match POPULATION_SIZE.")
+            
+            # Determine the best score and individual in this generation
             best_generation_score = max(scores)
+            best_individual_index = scores.index(best_generation_score)
+            
+            # Debugging: Ensure the best individual's index is within the bounds
+            print(f"Generation {generation}: Best Score Index: {best_individual_index}, Best Score: {best_generation_score}")
+            
             if best_generation_score > best_score:
                 best_score = best_generation_score
-                best_individual = population[scores.index(best_generation_score)]
+                best_individual = population[best_individual_index]
+            
             print(f"Generation {generation}: Best Score: {best_generation_score}")
+        
         return best_individual
+
+
     
     def get_state(self, game):
         player_pos = game.player_pos
