@@ -1,5 +1,5 @@
 # https://machinelearningmastery.com/simple-genetic-algorithm-from-scratch-in-python/
-# https://medium.com/@Data_Aficionado_1083/genetic-algorithms-optimizing-success-through-evolutionary-computing-f4e7d452084f
+# https://medium.com/@Data_Aficionadxo_1083/genetic-algorithms-optimizing-success-through-evolutionary-computing-f4e7d452084f
 # https://www.youtube.com/watch?v=EJeTWRP3Bd0&ab_channel=DigitalSreeni
 
 import torch
