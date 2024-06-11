@@ -1,6 +1,7 @@
 import pygame
 import sys
 import math
+import random
 
 
 MAX_SPEED = 5
@@ -27,20 +28,6 @@ class AGV:
         self.horizontal_wall = pygame.Rect(10, 10, self.screen_width, self.wall_thickness)
         self.vertical_wall = pygame.Rect(10, 10, self.wall_thickness, self.screen_height)
 
-        self.player_size = 50
-        self.player_pos = [self.screen_width - 50, self.screen_height - 50]
-        self.player_speed = 0
-        self.player_angle = 0
-        self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
-        self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
-        self.bottom_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] + self.player_size // 2]
-        self.bottom_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] + self.player_size // 2]
-        self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
-
-        self.parking_size = 100
-        self.parking_pos = [80, 80]
-        self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size - 30, self.parking_size)
-
         # Sensors
         self.d1 = 0
         self.d2 = 0
@@ -55,6 +42,32 @@ class AGV:
         self.clock = pygame.time.Clock()
         self.finish = False
         self.screen_text = ''
+
+        self.reset_game()
+
+    def reset_spot(self):
+        # Parking spot settings
+        self.parking_size = 200
+        self.parking_pos = [50, 50]  # Top-left corner of the parking spot
+        self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
+
+    def reset_player(self):
+        # Player settings
+        r = random.randint(1, 2)
+        self.player_size = 50
+        self.player_pos = [self.screen_width - 50, self.screen_height - 50]
+        self.player_speed = 0
+        self.player_angle = 0
+        self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
+        self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
+        self.bottom_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] + self.player_size // 2]
+        self.bottom_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] + self.player_size // 2]
+        self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
+
+    def reset_game(self):
+        self.reset_player()
+        self.reset_spot()
+        self.score = 0
 
     def initialize_joystick(self):
         try:
@@ -172,16 +185,16 @@ class AGV:
             self.player_angle += 5
 
 
-    def play_step(self, action):
-        print('play_step')
+
+    def play_step(self, speed_action,  angle_action):
 
         self.draw_scene()
 
         original_pos = self.player_pos[:]
         original_angle = self.player_angle
 
-        self.player_pos[0] += self.player_speed * math.sin(math.radians(action))
-        self.player_pos[1] -= self.player_speed * math.cos(math.radians(action))
+        self.player_pos[0] += speed_action * math.sin(math.radians(angle_action))
+        self.player_pos[1] -= speed_action * math.cos(math.radians(angle_action))
 
         self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
         self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
@@ -233,7 +246,7 @@ class AGV:
                 self.keyboard_move(keys)
 
             
-            self.play_step(self.player_angle)
+            self.play_step(self.player_speed, self.player_angle)
                 
             
             pygame.display.flip()
