@@ -47,15 +47,15 @@ class AGV:
 
     def reset_spot(self):
         # Parking spot settings
-        self.parking_size = 200
+        self.parking_size = 40
         self.parking_pos = [50, 50]  # Top-left corner of the parking spot
         self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
 
     def reset_player(self):
         # Player settings
         r = random.randint(1, 2)
-        self.player_size = 50
-        self.player_pos = [self.screen_width - 50, self.screen_height - 50]
+        self.player_size = 20
+        self.player_pos = [self.screen_width * 0.2 , self.screen_height - 100]
         self.player_speed = 0
         self.player_angle = 0
         self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
