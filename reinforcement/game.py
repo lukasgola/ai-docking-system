@@ -123,6 +123,19 @@ class AGV:
                 if wall.collidepoint(test_point):
                     return distance
             distance += 1
+    
+    def compute_relative_position(self):
+        dx = self.parking_pos[0] - self.player_pos[0]
+        dy = self.parking_pos[1] - self.player_pos[1]
+        distance = math.sqrt(dx**2 + dy**2)
+        return dx / self.screen_width, dy / self.screen_height, distance / max(self.screen_width, self.screen_height)
+
+    def compute_relative_angle(self):
+        target_angle = math.degrees(math.atan2(self.parking_pos[1] - self.player_pos[1], self.parking_pos[0] - self.player_pos[0]))
+        relative_angle = (target_angle - self.player_angle + 360) % 360
+        if relative_angle > 180:
+            relative_angle -= 360
+        return relative_angle / 180.0  # Normalized to range [-1, 1]
 
 
     def move(self, action):

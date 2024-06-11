@@ -5,6 +5,7 @@ from collections import deque
 from game import AGV
 from model import Linear_QNet, QTrainer
 from helper import plot
+import math
 
 # Agent setup
 
@@ -21,52 +22,40 @@ class Agent:
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = Linear_QNet(6, 256, 3)
+        self.model = Linear_QNet(11, 256, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
 
     def get_state(self, game):
-
         player_pos = game.player_pos
-        parking_pos = game.parking_pos
         player_angle = game.player_angle
-        player_size = game.player_size
 
-        d1 = game.d1
-        d2 = game.d2
-        d3 = game.d3
+        d1 = game.d1 / game.screen_width  # Normalized distance
+        d2 = game.d2 / game.screen_width  # Normalized distance
+        d3 = game.d3 / game.screen_width  # Normalized distance
 
-        half_size = player_size // 2
-        point_r = [player_pos[0] + half_size, player_pos[1]]
-        point_l = [player_pos[0] - half_size, player_pos[1]]
-        point_u = [player_pos[0], player_pos[1] + half_size]
-        point_d = [player_pos[0], player_pos[1] - half_size]
+        norm_player_x = player_pos[0] / game.screen_width
+        norm_player_y = player_pos[1] / game.screen_height
 
-        point_r = game.rotate_point(point_r, player_angle, player_pos)
-        point_l = game.rotate_point(point_l, player_angle, player_pos)
-        point_u = game.rotate_point(point_u, player_angle, player_pos)
-        point_d = game.rotate_point(point_d, player_angle, player_pos)
-
-        dir_u = player_angle >= 315 and player_angle < 45
-        dir_r = player_angle >= 45 and player_angle  < 135
-        dir_d = player_angle >= 135 and player_angle < 225
-        dir_l = player_angle >= 225 and player_angle < 315
-
+        dx, dy, distance = game.compute_relative_position()
+        relative_angle = game.compute_relative_angle()
 
         state = [
-
             d1,
             d2,
             d3,
-
-            player_angle,
-            player_pos[0],
-            player_pos[1],
-
-
+            math.sin(math.radians(player_angle)),
+            math.cos(math.radians(player_angle)),
+            norm_player_x,
+            norm_player_y,
+            dx,
+            dy,
+            distance,
+            relative_angle
         ]
 
-        return np.array(state, dtype=int)
+        return np.array(state, dtype=float)
+
 
 
 
