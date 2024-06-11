@@ -226,6 +226,8 @@ class AGV:
 
         self.screen.blit(self.screen_text, (self.screen_width // 2 - self.screen_text.get_width() // 2, self.screen_height // 2 - self.screen_text.get_height() // 2))
 
+        pygame.display.flip()
+
 
     def run(self):
         while self.running:
@@ -237,7 +239,6 @@ class AGV:
                     if event.type == pygame.JOYAXISMOTION:
                         self.analog_keys[event.axis] = event.value
 
-
             keys = pygame.key.get_pressed()
 
             if self.joystick:
@@ -246,10 +247,10 @@ class AGV:
                 self.keyboard_move(keys)
 
             
-            self.play_step(self.player_speed, self.player_angle)
+            #self.play_step(self.player_speed, self.player_angle)
                 
             
-            pygame.display.flip()
+            
             self.clock.tick(30)
 
         pygame.quit()
