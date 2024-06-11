@@ -23,14 +23,19 @@ class AGV:
         self.green = (0, 255, 0)
         self.blue = (0, 0, 255)
 
+        self.wall_thickness = 20
+        self.horizontal_wall = pygame.Rect(10, 10, self.screen_width, self.wall_thickness)
+        self.vertical_wall = pygame.Rect(10, 10, self.wall_thickness, self.screen_height)
+
         self.player_size = 50
         self.player_pos = [self.screen_width - 50, self.screen_height - 50]
         self.player_speed = 0
         self.player_angle = 0
-
-        self.wall_thickness = 20
-        self.horizontal_wall = pygame.Rect(10, 10, self.screen_width, self.wall_thickness)
-        self.vertical_wall = pygame.Rect(10, 10, self.wall_thickness, self.screen_height)
+        self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
+        self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
+        self.bottom_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] + self.player_size // 2]
+        self.bottom_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] + self.player_size // 2]
+        self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
 
         self.parking_size = 100
         self.parking_pos = [80, 80]
@@ -91,10 +96,60 @@ class AGV:
             distance += 1
 
 
+    def draw_sensors(self, top_left, top_right, bottom_left):
+        # Calculate and display distance to the nearest wall from top_left
+        distance_left = self.distance_to_wall(top_left, self.player_angle, [self.horizontal_wall, self.vertical_wall])
+        end_point_left = (top_left[0] + distance_left * math.sin(math.radians(self.player_angle)), top_left[1] - distance_left * math.cos(math.radians(self.player_angle)))
+        pygame.draw.line(self.screen, self.blue, top_left, end_point_left, 2)
+        distance_text_left = self.small_font.render(f'{distance_left:.2f}', True, self.blue)
+        self.screen.blit(distance_text_left, end_point_left)
+
+        # Calculate and display distance to the nearest wall from top_right
+        distance_right = self.distance_to_wall(top_right, self.player_angle, [self.horizontal_wall, self.vertical_wall])
+        end_point_right = (top_right[0] + distance_right * math.sin(math.radians(self.player_angle)), top_right[1] - distance_right * math.cos(math.radians(self.player_angle)))
+        pygame.draw.line(self.screen, self.blue, top_right, end_point_right, 2)
+        distance_text_right = self.small_font.render(f'{distance_right:.2f}', True, self.blue)
+        self.screen.blit(distance_text_right, end_point_right)
+
+        # Calculate and display distance to the nearest wall from bottom_left
+        bottom_angle = self.player_angle + 270
+        distance_bottom_left = self.distance_to_wall(bottom_left, bottom_angle, [self.horizontal_wall, self.vertical_wall])
+        end_point_bottom_left = (bottom_left[0] + distance_bottom_left * math.sin(math.radians(bottom_angle)), bottom_left[1] - distance_bottom_left * math.cos(math.radians(bottom_angle)))
+        pygame.draw.line(self.screen, self.blue, bottom_left, end_point_bottom_left, 2)
+        distance_text_bottom_left = self.small_font.render(f'{distance_bottom_left:.2f}', True, self.blue)
+        self.screen.blit(distance_text_bottom_left, end_point_bottom_left)
+
+        distances_text = [
+            f'Top Left: {distance_left:.2f}',
+            f'Top Right: {distance_right:.2f}',
+            f'Bottom Left: {distance_bottom_left:.2f}'
+        ]
+        for i, text in enumerate(distances_text):
+            distance_text = self.small_font.render(text, True, self.white)
+            self.screen.blit(distance_text, (self.screen_width - distance_text.get_width() - 10, 50 + i * 20))
+
+
     def play_step(self, action):
         print('play_step')
         self.player_pos[0] += self.player_speed * math.sin(math.radians(action))
         self.player_pos[1] -= self.player_speed * math.cos(math.radians(action))
+
+        self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
+        self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
+        self.bottom_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] + self.player_size // 2]
+        self.bottom_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] + self.player_size // 2]
+
+        origin = self.player_pos
+        self.top_left = self.rotate_point(self.top_left, self.player_angle, origin)
+        self.top_right = self.rotate_point(self.top_right, self.player_angle, origin)
+        self.bottom_left = self.rotate_point(self.bottom_left, self.player_angle, origin)
+        self.bottom_right = self.rotate_point(self.bottom_right, self.player_angle, origin)
+
+        # Draw player
+        player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
+
+
+        self.draw_sensors(self.top_left, self.top_right, self.bottom_left)
 
 
     def run(self):
@@ -142,62 +197,25 @@ class AGV:
                     self.player_angle += 5
 
 
-            self.play_step(self.player_angle)
-            
-            
-            half_size = self.player_size // 2
-            top_left = [self.player_pos[0] - half_size, self.player_pos[1] - 2 * half_size]
-            top_right = [self.player_pos[0] + half_size, self.player_pos[1] - 2 * half_size]
-            bottom_left = [self.player_pos[0] - half_size, self.player_pos[1] + half_size]
-            bottom_right = [self.player_pos[0] + half_size, self.player_pos[1] + half_size]
 
-            origin = self.player_pos
-            top_left = self.rotate_point(top_left, self.player_angle, origin)
-            top_right = self.rotate_point(top_right, self.player_angle, origin)
-            bottom_left = self.rotate_point(bottom_left, self.player_angle, origin)
-            bottom_right = self.rotate_point(bottom_right, self.player_angle, origin)
 
+            # Draw scene
             self.screen.fill(self.black)
             pygame.draw.rect(self.screen, self.white, self.horizontal_wall)
             pygame.draw.rect(self.screen, self.white, self.vertical_wall)
             pygame.draw.rect(self.screen, self.green, self.parking_rect)
 
-            player_rect = pygame.draw.polygon(self.screen, self.red, [top_left, top_right, bottom_right, bottom_left])
+            
+            self.play_step(self.player_angle)
 
-            distance_left = self.distance_to_wall(top_left, self.player_angle, [self.horizontal_wall, self.vertical_wall])
-            end_point_left = (top_left[0] + distance_left * math.sin(math.radians(self.player_angle)), top_left[1] - distance_left * math.cos(math.radians(self.player_angle)))
-            pygame.draw.line(self.screen, self.blue, top_left, end_point_left, 2)
-            distance_text_left = self.small_font.render(f'{distance_left:.2f}', True, self.blue)
-            self.screen.blit(distance_text_left, end_point_left)
+            
 
-            distance_right = self.distance_to_wall(top_right, self.player_angle, [self.horizontal_wall, self.vertical_wall])
-            end_point_right = (top_right[0] + distance_right * math.sin(math.radians(self.player_angle)), top_right[1] - distance_right * math.cos(math.radians(self.player_angle)))
-            pygame.draw.line(self.screen, self.blue, top_right, end_point_right, 2)
-            distance_text_right = self.small_font.render(f'{distance_right:.2f}', True, self.blue)
-            self.screen.blit(distance_text_right, end_point_right)
-
-            bottom_angle = self.player_angle + 270
-            distance_bottom_left = self.distance_to_wall(bottom_left, bottom_angle, [self.horizontal_wall, self.vertical_wall])
-            end_point_bottom_left = (bottom_left[0] + distance_bottom_left * math.sin(math.radians(bottom_angle)), bottom_left[1] - distance_bottom_left * math.cos(math.radians(bottom_angle)))
-            pygame.draw.line(self.screen, self.blue, bottom_left, end_point_bottom_left, 2)
-            distance_text_bottom_left = self.small_font.render(f'{distance_bottom_left:.2f}', True, self.blue)
-            self.screen.blit(distance_text_bottom_left, end_point_bottom_left)
-
-            distances_text = [
-                f'Top Left: {distance_left:.2f}',
-                f'Top Right: {distance_right:.2f}',
-                f'Bottom Left: {distance_bottom_left:.2f}'
-            ]
-            for i, text in enumerate(distances_text):
-                distance_text = self.small_font.render(text, True, self.white)
-                self.screen.blit(distance_text, (self.screen_width - distance_text.get_width() - 10, 50 + i * 20))
-
-            if self.check_collision(player_rect, [self.horizontal_wall, self.vertical_wall]):
+            if self.check_collision(self.player_rect, [self.horizontal_wall, self.vertical_wall]):
                 self.player_pos = original_pos
                 self.player_angle = original_angle
                 text = self.font.render('COLISION', True, self.white)
 
-            elif self.is_in_parking_spot(player_rect, self.parking_rect):
+            elif self.is_in_parking_spot(self.player_rect, self.parking_rect):
                 text = self.font.render('FINISH', True, self.white)
                 self.finish = True
             else:
