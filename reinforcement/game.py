@@ -98,7 +98,7 @@ class AGV:
                 return True
         return False
 
-    def is_in_parking_spot(self, rect1, points):
+    def is_in_parking_spot(self, points, rect1):
         for point in points:
             if not rect1.collidepoint(point):
                 return False  # Return False if any point is outside the rectangle
@@ -117,7 +117,7 @@ class AGV:
             
             # Check if the test point is out of bounds
             if test_point[0] < 0 or test_point[0] > self.screen_width or test_point[1] < 0 or test_point[1] > self.screen_height:
-                return -1
+                return 1000
             
             for wall in walls:
                 if wall.collidepoint(test_point):
@@ -242,7 +242,7 @@ class AGV:
                 self.hit_point = 1
                 
         
-        if self.is_in_parking_spot(self.parking_rect, points):
+        if self.is_in_parking_spot(points, self.parking_rect):
             reward = 20
             self.score += 1
             self.reset_player()
