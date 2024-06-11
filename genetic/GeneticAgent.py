@@ -1,3 +1,7 @@
+# https://machinelearningmastery.com/simple-genetic-algorithm-from-scratch-in-python/
+# https://medium.com/@Data_Aficionado_1083/genetic-algorithms-optimizing-success-through-evolutionary-computing-f4e7d452084f
+# https://www.youtube.com/watch?v=EJeTWRP3Bd0&ab_channel=DigitalSreeni
+
 import torch
 import random
 import numpy as np
@@ -71,7 +75,7 @@ def calculate_fitness(agent, game):
         score += step_score
         if done:
             game.reset_game()
-    agent.fitness = score / game.screen_width  # Normalize fitness
+    agent.fitness = score 
 
 
 def crossover(parent1, parent2):
