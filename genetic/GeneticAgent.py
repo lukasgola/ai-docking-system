@@ -2,165 +2,119 @@ import torch
 import random
 import numpy as np
 from collections import deque
-from game import AGV
 from model import Linear_QNet, QTrainer
-from helper import plot
+import math
+from game import AGV  # Assuming this is your environment
 
-# Genetic Algorithm setup
-POPULATION_SIZE = 50
-NUM_GENERATIONS = 20
-NUM_PARENTS = 10
-OFFSPRING_SIZE = 2
+POPULATION_SIZE = 100
 MUTATION_RATE = 0.1
-NUM_FEATURES = 11  # Number of features in the state representation
+NUM_GENERATIONS = 50
 
-# Agent setup
-MAX_MEMORY = 100_100
-BATCH_SIZE = 1000
-EPISODE_LENGTH = 1000
-LR = 0.001
+class Agent:
+    def __init__(self, model):
+        self.model = model
+        self.fitness = 0
 
-class GeneticAgent:
-    def __init__(self):
-        self.n_games = 0
-        self.epsilon = 0 # randomness
-        self.gamma = 0.9 # discount rate
-
-    def initialize_population(self):
-        population = []
-        for _ in range(POPULATION_SIZE):
-            individual = [random.uniform(-1, 1) for _ in range(NUM_FEATURES)]
-            population.append(individual)
-        return population
-
-    def evaluate_population(self, population):
-        scores = []
-        for individual in population:
-            score = self.evaluate_individual(individual)
-            scores.append(score)
-        return scores
-
-    def evaluate_individual(self, individual):
-        game = AGV()
-        total_reward = 0
-        for _ in range(EPISODE_LENGTH):
-            state = self.get_state(game)
-            action = self.choose_action(state, individual)
-            reward, game_over, score = game.play_step(action)
-            total_reward += reward
-            if game_over:
-                break
-        return total_reward
-
-    def choose_action(self, state, individual):
-        action_value = np.dot(state, individual)
-        if action_value < -0.33:
-            return [1, 0, 0]  # Left
-        elif action_value < 0.33:
-            return [0, 1, 0]  # Straight
-        else:
-            return [0, 0, 1]  # Right
-
-    def select_parents(self, population, scores):
-        parents_indices = np.argsort(scores)[-NUM_PARENTS:]
-        parents = [population[i] for i in parents_indices]
-        return parents
-
-    def crossover(self, parents):
-        offspring = []
-        for _ in range(OFFSPRING_SIZE):
-            parent1 = random.choice(parents)
-            parent2 = random.choice(parents)
-            crossover_point = random.randint(1, len(parent1) - 1)
-            child = parent1[:crossover_point] + parent2[crossover_point:]
-            offspring.append(child)
-        return offspring
-
-    def mutate(self, offspring_population):
-        for i in range(len(offspring_population)):
-            if random.random() < MUTATION_RATE:
-                gene_to_mutate = random.randint(0, len(offspring_population[i]) - 1)
-                offspring_population[i][gene_to_mutate] = random.uniform(-1, 1)
-        return offspring_population
-
-    def train_genetic(self):
-        best_individual = None
-        best_score = float('-inf')
-        population = self.initialize_population()
-        
-        for generation in range(NUM_GENERATIONS):
-            # Evaluate the population
-            scores = self.evaluate_population(population)
-            
-            # Debugging: Ensure population and scores have the same length
-            print(f"Generation {generation}: Population Size: {len(population)}, Scores Size: {len(scores)}")
-            
-            if len(population) != len(scores):
-                raise ValueError("Population size and scores size do not match.")
-            
-            # Select the best parents
-            parents = self.select_parents(population, scores)
-            
-            # Generate offspring
-            offspring = self.crossover(parents)
-            offspring = self.mutate(offspring)
-            
-            # Update population
-            population = parents + offspring
-            
-            # Ensure the new population size is correct
-            print(f"Generation {generation}: Population Size After Reproduction: {len(population)}")
-            
-            if len(population) != POPULATION_SIZE:
-                raise ValueError("Population size after reproduction does not match POPULATION_SIZE.")
-            
-            # Determine the best score and individual in this generation
-            best_generation_score = max(scores)
-            best_individual_index = scores.index(best_generation_score)
-            
-            # Debugging: Ensure the best individual's index is within the bounds
-            print(f"Generation {generation}: Best Score Index: {best_individual_index}, Best Score: {best_generation_score}")
-            
-            if best_generation_score > best_score:
-                best_score = best_generation_score
-                best_individual = population[best_individual_index]
-            
-            print(f"Generation {generation}: Best Score: {best_generation_score}")
-        
-        return best_individual
-
-
-    
     def get_state(self, game):
         player_pos = game.player_pos
-        parking_pos = game.parking_pos
         player_angle = game.player_angle
 
-        d1 = game.d1
-        d2 = game.d2
-        d3 = game.d3
+        d1 = game.d1 / game.screen_width  # Normalized distance
+        d2 = game.d2 / game.screen_width  # Normalized distance
+        d3 = game.d3 / game.screen_width  # Normalized distance
 
-        # Relative positions of the parking spot
-        relative_parking_x = parking_pos[0] - player_pos[0]
-        relative_parking_y = parking_pos[1] - player_pos[1]
+        norm_player_x = player_pos[0] / game.screen_width
+        norm_player_y = player_pos[1] / game.screen_height
+
+        dx, dy, distance = game.compute_relative_position()
+        relative_angle = game.compute_relative_angle()
 
         state = [
-            d1,  # Distance to the nearest wall from bottom_left
-            d2,  # Distance to the nearest wall from top_left
-            d3,  # Distance to the nearest wall from top_right
-            player_angle,
-            player_pos[0],
-            player_pos[1],
-            relative_parking_x,
-            relative_parking_y,
-            game.parking_rect.width,
-            game.parking_rect.height,
-            game.score
+            d1,
+            d2,
+            d3,
+            math.sin(math.radians(player_angle)),
+            math.cos(math.radians(player_angle)),
+            norm_player_x,
+            norm_player_y,
+            dx,
+            dy,
+            distance,
+            relative_angle
         ]
 
-        return np.array(state, dtype=np.float32)
+        return np.array(state, dtype=float)
+
+    def set_model_weights(self, weights):
+        self.model.load_state_dict(weights)
+
+    def get_model_weights(self):
+        return self.model.state_dict()
+
+def create_population():
+    population = []
+    for _ in range(POPULATION_SIZE):
+        model = Linear_QNet(11, 256, 3)  # Assuming this is how you create your model
+        agent = Agent(model)
+        population.append(agent)
+    return population
+
+def calculate_fitness(agent, game):
+    score = 0
+    for _ in range(100):  # Play the game for 100 steps
+        state = agent.get_state(game)
+        state_tensor = torch.tensor(state, dtype=torch.float)
+        prediction = agent.model(state_tensor)
+        action = torch.argmax(prediction).item()
+        final_move = action  # Changed to single integer action
+        reward, done, step_score = game.play_step(final_move)
+        score += step_score
+        if done:
+            game.reset_game()
+    agent.fitness = score / game.screen_width  # Normalize fitness
+
+
+def crossover(parent1, parent2):
+    child_model = Linear_QNet(11, 256, 3)
+    for key in child_model.state_dict().keys():
+        if random.random() < 0.5:
+            child_model.state_dict()[key] = parent1.get_model_weights()[key]
+        else:
+            child_model.state_dict()[key] = parent2.get_model_weights()[key]
+    return Agent(child_model)
+
+def mutate(agent):
+    child_model = agent.model
+    for key in child_model.state_dict().keys():
+        if random.random() < MUTATION_RATE:
+            child_model.state_dict()[key] += torch.randn_like(child_model.state_dict()[key]) * 0.1  # Mutation strength
+    return Agent(child_model)
+
+def select_parents(population):
+    return random.choices(population, weights=[agent.fitness for agent in population], k=2)
+
+def evolve_population(population):
+    new_population = []
+    for _ in range(POPULATION_SIZE):
+        parent1, parent2 = select_parents(population)
+        child = crossover(parent1, parent2)
+        child = mutate(child)
+        new_population.append(child)
+    return new_population
+
+def train():
+    population = create_population()
+    game = AGV()  # Assuming this is your game environment
+    for generation in range(NUM_GENERATIONS):
+        for agent in population:
+            calculate_fitness(agent, game)
+        population.sort(key=lambda x: x.fitness, reverse=True)
+        print(f"Generation {generation + 1}, Best Fitness: {population[0].fitness}")
+        if sum(agent.fitness for agent in population) == 0:
+            print("All agents have zero fitness. Exiting training.")
+            return
+        population = evolve_population(population)
+
 
 if __name__ == '__main__':
-    agent = GeneticAgent()
-    best_individual = agent.train_genetic()
-    print("Best Individual:", best_individual)
+    train()

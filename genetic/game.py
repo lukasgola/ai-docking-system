@@ -59,7 +59,7 @@ class AGV:
 
     def reset_player(self):
         # Player settings
-        r = random.randint(1, 4)
+        r = random.randint(1, 2)
         self.player_size = 50
         self.player_pos = [self.screen_width * 0.2 * r, self.screen_height - 80]
         self.player_speed = 2  # Speed is initially set to 0
@@ -139,13 +139,19 @@ class AGV:
 
 
     def move(self, action):
-        if np.array_equal(action, [1, 0, 0]): # turn left sharply
-            self.player_angle -= self.turn_force
-        elif np.array_equal(action, [0, 1, 0]):  # no change
-            self.player_angle = self.player_angle 
-        elif np.array_equal(action, [0, 0, 1]):  # turn right sharply
-            self.player_angle += self.turn_force
+        #if np.array_equal(action, [1, 0, 0]): # turn left sharply
+        #    self.player_angle -= self.turn_force
+        #elif np.array_equal(action, [0, 1, 0]):  # no change
+        #    self.player_angle = self.player_angle 
+        #elif np.array_equal(action, [0, 0, 1]):  # turn right sharply
+        #    self.player_angle += self.turn_force
 
+        if action == 0:
+            self.player_angle -= self.turn_force
+        elif action == 1:
+            self.player_angle = self.player_angle
+        else:
+            self.player_angle += self.turn_force
         # Ensure player_angle is always between 0 and 360
         #self.player_angle = self.player_angle % 360
 
