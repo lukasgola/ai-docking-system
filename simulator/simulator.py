@@ -85,14 +85,16 @@ def distance_to_wall(point, angle, walls):
 
     while True:
         test_point = (px + distance * dx, py + distance * dy)
-        if test_point[0] < 0 or test_point[0] > screen_width or test_point[1] < 0 or test_point[1] > screen_height:
-            break
+        
+        # Check if the test point is out of bounds
+        if test_point[0] < 0 or test_point[0] > 800 or test_point[1] < 0 or test_point[1] > 600:
+            return -1
+        
         for wall in walls:
             if wall.collidepoint(test_point):
                 return distance
         distance += 1
 
-    return distance
 
 while running:
     for event in pygame.event.get():

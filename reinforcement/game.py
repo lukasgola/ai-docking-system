@@ -39,6 +39,7 @@ class AGV:
 
         # Score
         self.score = 0
+        self.hit_point = 0
 
         # Sensors
         self.d1 = 0
@@ -64,6 +65,7 @@ class AGV:
         self.player_speed = 2  # Speed is initially set to 0
         self.player_angle = 0
         self.turn_force = 1
+        self.hit_point = 0
 
     def reset_game(self):
         self.reset_player()
@@ -90,12 +92,17 @@ class AGV:
         return False
 
     
-
-    def is_in_parking_spot(self, points, parking_rect):
+    def hit_parking_spot(self, points, parking_rect):
         for point in points:
             if parking_rect.collidepoint(point):
                 return True
         return False
+
+    def is_in_parking_spot(self, rect1, points):
+        for point in points:
+            if not rect1.collidepoint(point):
+                return False  # Return False if any point is outside the rectangle
+        return True  # Return True if all points are inside the rectangle
 
 
     def distance_to_wall(self, point, angle, walls):
@@ -107,14 +114,15 @@ class AGV:
 
         while True:
             test_point = (px + distance * dx, py + distance * dy)
+            
+            # Check if the test point is out of bounds
             if test_point[0] < 0 or test_point[0] > self.screen_width or test_point[1] < 0 or test_point[1] > self.screen_height:
-                break
+                return -1
+            
             for wall in walls:
                 if wall.collidepoint(test_point):
                     return distance
             distance += 1
-
-        return distance
 
 
     def move(self, action):
@@ -224,14 +232,20 @@ class AGV:
 
         # Display "FINISH" if in parking spot
         # Check if player is in parking spot
+
         points = [top_left, top_right, bottom_left, bottom_right]
-        if self.is_in_parking_spot(points, self.parking_rect):
+
+        if self.hit_parking_spot(points, self.parking_rect):
             reward = 10
+            if self.hit_point == 0:
+                self.score += 1
+                self.hit_point = 1
+                
+        
+        if self.is_in_parking_spot(self.parking_rect, points):
+            reward = 20
             self.score += 1
-            #game_over = True
             self.reset_player()
-            #text = self.font.render('FINISH', True, self.white)
-            #self.screen.blit(text, (self.screen_width // 2 - text.get_width() // 2, self.screen_height // 2 - text.get_height() // 2))
 
         # Update display
         pygame.display.flip()
