@@ -9,6 +9,7 @@ from collections import deque
 from model import Linear_QNet, QTrainer
 import math
 from game import AGV  # Assuming this is your environment
+from helper import plot
 
 POPULATION_SIZE = 100
 MUTATION_RATE = 0.1
@@ -75,7 +76,7 @@ def calculate_fitness(agent, game):
         score += step_score
         if done:
             game.reset_game()
-    agent.fitness = score 
+    agent.fitness = score / game.screen_width
 
 
 def crossover(parent1, parent2):
@@ -109,15 +110,21 @@ def evolve_population(population):
 def train():
     population = create_population()
     game = AGV()  # Assuming this is your game environment
+    scores = []
     for generation in range(NUM_GENERATIONS):
         for agent in population:
             calculate_fitness(agent, game)
         population.sort(key=lambda x: x.fitness, reverse=True)
         print(f"Generation {generation + 1}, Best Fitness: {population[0].fitness}")
+        scores.append(population[0].fitness)
         if sum(agent.fitness for agent in population) == 0:
             print("All agents have zero fitness. Exiting training.")
             return
         population = evolve_population(population)
+
+        
+        print(scores)
+        plot(scores)
 
 
 if __name__ == '__main__':

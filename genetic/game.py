@@ -147,11 +147,11 @@ class AGV:
         #    self.player_angle += self.turn_force
 
         if action == 0:
-            self.player_angle -= self.turn_force
+            self.player_angle -= self.turn_force / 4
         elif action == 1:
             self.player_angle = self.player_angle
         else:
-            self.player_angle += self.turn_force
+            self.player_angle += self.turn_force / 4
         # Ensure player_angle is always between 0 and 360
         #self.player_angle = self.player_angle % 360
 
