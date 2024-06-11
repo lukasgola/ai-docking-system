@@ -41,6 +41,11 @@ class AGV:
         self.parking_pos = [80, 80]
         self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size - 30, self.parking_size)
 
+        # Sensors
+        self.d1 = 0
+        self.d2 = 0
+        self.d3 = 0
+
         self.joystick = None
         self.initialize_joystick()
 
@@ -49,6 +54,7 @@ class AGV:
         self.running = True
         self.clock = pygame.time.Clock()
         self.finish = False
+        self.screen_text = ''
 
     def initialize_joystick(self):
         try:
@@ -99,6 +105,7 @@ class AGV:
     def draw_sensors(self, top_left, top_right, bottom_left):
         # Calculate and display distance to the nearest wall from top_left
         distance_left = self.distance_to_wall(top_left, self.player_angle, [self.horizontal_wall, self.vertical_wall])
+        self.d2 = distance_left
         end_point_left = (top_left[0] + distance_left * math.sin(math.radians(self.player_angle)), top_left[1] - distance_left * math.cos(math.radians(self.player_angle)))
         pygame.draw.line(self.screen, self.blue, top_left, end_point_left, 2)
         distance_text_left = self.small_font.render(f'{distance_left:.2f}', True, self.blue)
@@ -106,6 +113,7 @@ class AGV:
 
         # Calculate and display distance to the nearest wall from top_right
         distance_right = self.distance_to_wall(top_right, self.player_angle, [self.horizontal_wall, self.vertical_wall])
+        self.d3 = distance_right
         end_point_right = (top_right[0] + distance_right * math.sin(math.radians(self.player_angle)), top_right[1] - distance_right * math.cos(math.radians(self.player_angle)))
         pygame.draw.line(self.screen, self.blue, top_right, end_point_right, 2)
         distance_text_right = self.small_font.render(f'{distance_right:.2f}', True, self.blue)
@@ -114,6 +122,7 @@ class AGV:
         # Calculate and display distance to the nearest wall from bottom_left
         bottom_angle = self.player_angle + 270
         distance_bottom_left = self.distance_to_wall(bottom_left, bottom_angle, [self.horizontal_wall, self.vertical_wall])
+        self.d1 = distance_bottom_left
         end_point_bottom_left = (bottom_left[0] + distance_bottom_left * math.sin(math.radians(bottom_angle)), bottom_left[1] - distance_bottom_left * math.cos(math.radians(bottom_angle)))
         pygame.draw.line(self.screen, self.blue, bottom_left, end_point_bottom_left, 2)
         distance_text_bottom_left = self.small_font.render(f'{distance_bottom_left:.2f}', True, self.blue)
@@ -128,9 +137,49 @@ class AGV:
             distance_text = self.small_font.render(text, True, self.white)
             self.screen.blit(distance_text, (self.screen_width - distance_text.get_width() - 10, 50 + i * 20))
 
+    def draw_scene(self):
+        # Draw scene
+        self.screen.fill(self.black)
+        pygame.draw.rect(self.screen, self.white, self.horizontal_wall)
+        pygame.draw.rect(self.screen, self.white, self.vertical_wall)
+        pygame.draw.rect(self.screen, self.green, self.parking_rect)
+
+
+    def analog_move(self):
+        if self.analog_keys[0] < -0.3:
+            self.player_angle -= abs(self.analog_keys[0]) * 2
+
+        if self.analog_keys[0] > 0.3:
+            self.player_angle += abs(self.analog_keys[0]) * 2
+
+        if self.analog_keys[5] > -1:
+            self.player_speed = (self.analog_keys[5] + 1) * 2
+        elif self.analog_keys[4] > -1:
+            self.player_speed = -(self.analog_keys[4] + 1) * 2
+        else:
+            self.player_speed = 1
+
+    def keyboard_move(self, keys):
+        if keys[pygame.K_w]:
+            self.player_speed = MAX_SPEED
+        elif keys[pygame.K_s]:
+            self.player_speed = -3
+        else:
+            self.player_speed = 0
+        if keys[pygame.K_a]:
+            self.player_angle -= 5
+        if keys[pygame.K_d]:
+            self.player_angle += 5
+
 
     def play_step(self, action):
         print('play_step')
+
+        self.draw_scene()
+
+        original_pos = self.player_pos[:]
+        original_angle = self.player_angle
+
         self.player_pos[0] += self.player_speed * math.sin(math.radians(action))
         self.player_pos[1] -= self.player_speed * math.cos(math.radians(action))
 
@@ -146,10 +195,23 @@ class AGV:
         self.bottom_right = self.rotate_point(self.bottom_right, self.player_angle, origin)
 
         # Draw player
-        player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
+        self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
 
 
         self.draw_sensors(self.top_left, self.top_right, self.bottom_left)
+
+        if self.check_collision(self.player_rect, [self.horizontal_wall, self.vertical_wall]):
+            self.player_pos = original_pos
+            self.player_angle = original_angle
+            self.screen_text = self.font.render('COLISION', True, self.white)
+
+        elif self.is_in_parking_spot(self.player_rect, self.parking_rect):
+            self.screen_text = self.font.render('FINISH', True, self.white)
+            self.finish = True
+        else:
+            self.screen_text = self.font.render('', True, self.white)
+
+        self.screen.blit(self.screen_text, (self.screen_width // 2 - self.screen_text.get_width() // 2, self.screen_height // 2 - self.screen_text.get_height() // 2))
 
 
     def run(self):
@@ -162,68 +224,18 @@ class AGV:
                     if event.type == pygame.JOYAXISMOTION:
                         self.analog_keys[event.axis] = event.value
 
-            original_pos = self.player_pos[:]
-            original_angle = self.player_angle
 
             keys = pygame.key.get_pressed()
 
-
-
             if self.joystick:
-                if self.analog_keys[0] < -0.3:
-                    self.player_angle -= abs(self.analog_keys[0]) * 2
-
-                if self.analog_keys[0] > 0.3:
-                    self.player_angle += abs(self.analog_keys[0]) * 2
-
-                if self.analog_keys[5] > -1:
-                    self.player_speed = (self.analog_keys[5] + 1) * 2
-                elif self.analog_keys[4] > -1:
-                    self.player_speed = -(self.analog_keys[4] + 1) * 2
-                else:
-                    self.player_speed = 1
-
-                
+                self.analog_move()
             else:
-                if keys[pygame.K_w]:
-                    self.player_speed = MAX_SPEED
-                elif keys[pygame.K_s]:
-                    self.player_speed = -3
-                else:
-                    self.player_speed = 0
-                if keys[pygame.K_a]:
-                    self.player_angle -= 5
-                if keys[pygame.K_d]:
-                    self.player_angle += 5
-
-
-
-
-            # Draw scene
-            self.screen.fill(self.black)
-            pygame.draw.rect(self.screen, self.white, self.horizontal_wall)
-            pygame.draw.rect(self.screen, self.white, self.vertical_wall)
-            pygame.draw.rect(self.screen, self.green, self.parking_rect)
+                self.keyboard_move(keys)
 
             
             self.play_step(self.player_angle)
-
-            
-
-            if self.check_collision(self.player_rect, [self.horizontal_wall, self.vertical_wall]):
-                self.player_pos = original_pos
-                self.player_angle = original_angle
-                text = self.font.render('COLISION', True, self.white)
-
-            elif self.is_in_parking_spot(self.player_rect, self.parking_rect):
-                text = self.font.render('FINISH', True, self.white)
-                self.finish = True
-            else:
-                text = self.font.render('', True, self.white)
                 
             
-            self.screen.blit(text, (self.screen_width // 2 - text.get_width() // 2, self.screen_height // 2 - text.get_height() // 2))
-
             pygame.display.flip()
             self.clock.tick(30)
 
