@@ -1,32 +1,26 @@
 import numpy as np
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
+import matplotlib.pyplot as plt
 
 class FuzzyLogicController:
     def __init__(self):
         self.setup_fuzzy_logic()
+        self.show_plot()
 
     def setup_fuzzy_logic(self):
         
         # Define fuzzy variables
-        self.dist1 = ctrl.Antecedent(np.arange(0, 900, 1), 'dist1')
-        self.dist2 = ctrl.Antecedent(np.arange(0, 900, 1), 'dist2')
-        self.dist3 = ctrl.Antecedent(np.arange(0, 900, 1), 'dist3')
+        self.dist1 = ctrl.Antecedent(np.arange(0, 800, 1), 'dist1')
+        self.dist2 = ctrl.Antecedent(np.arange(0, 800, 1), 'dist2')
+        self.dist3 = ctrl.Antecedent(np.arange(0, 800, 1), 'dist3')
         self.angle = ctrl.Consequent(np.arange(-45, 46, 1), 'angle')
         self.speed = ctrl.Consequent(np.arange(-3, 6, 1), 'speed')
 
         # Membership functions for distances
         self.dist1['close'] = fuzz.trimf(self.dist1.universe, [0, 0, 20])
         self.dist1['ok'] = fuzz.trimf(self.dist1.universe, [10, 20, 30])
-        self.dist1['far'] = fuzz.trimf(self.dist1.universe, [20, 900, 900])
-        
-        self.dist2['close'] = fuzz.trimf(self.dist2.universe, [0, 0, 20])
-        self.dist2['ok'] = fuzz.trimf(self.dist2.universe, [10, 20, 30])
-        self.dist2['far'] = fuzz.trimf(self.dist2.universe, [20, 900, 900])
-        
-        self.dist3['close'] = fuzz.trimf(self.dist3.universe, [0, 0, 20])
-        self.dist3['ok'] = fuzz.trimf(self.dist3.universe, [10, 20, 30])
-        self.dist3['far'] = fuzz.trimf(self.dist3.universe, [20, 900, 900])
+        self.dist1['far'] = fuzz.trimf(self.dist1.universe, [20, 800, 800])
 
         # Membership functions for angle
         self.angle['left'] = fuzz.trimf(self.angle.universe, [-60, -60, 0])
@@ -34,10 +28,21 @@ class FuzzyLogicController:
         self.angle['right'] = fuzz.trimf(self.angle.universe, [0, 60, 60])
 
         # Membership functions for speed
-        self.speed['back'] = fuzz.trimf(self.speed.universe, [-3, -1, 0])
-        self.speed['stop'] = fuzz.trimf(self.speed.universe, [0, 0, 0])
-        self.speed['slow'] = fuzz.trimf(self.speed.universe, [0, 0, 3])
+        self.speed['back'] = fuzz.trimf(self.speed.universe, [-3, -1, -1])
+        self.speed['stop'] = fuzz.trimf(self.speed.universe, [-1, 0, 1])
+        self.speed['slow'] = fuzz.trimf(self.speed.universe, [0, 1, 3])
         self.speed['fast'] = fuzz.trimf(self.speed.universe, [3, 5, 5])
+        
+        
+        self.dist2['close'] = fuzz.trimf(self.dist2.universe, [0, 0, 20])
+        self.dist2['ok'] = fuzz.trimf(self.dist2.universe, [10, 20, 30])
+        self.dist2['far'] = fuzz.trimf(self.dist2.universe, [20, 800, 800])
+        
+        self.dist3['close'] = fuzz.trimf(self.dist3.universe, [0, 0, 20])
+        self.dist3['ok'] = fuzz.trimf(self.dist3.universe, [10, 20, 30])
+        self.dist3['far'] = fuzz.trimf(self.dist3.universe, [20, 800, 800])
+
+        
 
         # Define fuzzy rules
         rule1 = ctrl.Rule(self.dist1['close'] & self.dist2['close'] & self.dist3['close'], (self.angle['straight'], self.speed['stop']))
@@ -72,6 +77,41 @@ class FuzzyLogicController:
         self.steering.compute()
 
         return self.steering.output['angle'], self.steering.output['speed']
+    
+    def show_plot(self):
+        # Visualize these universes and membership functions
+        fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(8, 6))
+
+
+        #ax0.plot(self.dist1.universe, self.dist1['close'].mf, 'b', linewidth=1.5, label='Close')
+        #ax0.plot(self.dist1.universe, self.dist1['ok'].mf, 'g', linewidth=1.5, label='Ok')
+        #ax0.plot(self.dist1.universe, self.dist1['far'].mf, 'r', linewidth=1.5, label='Far')
+        #ax0.set_title('Dist1')
+        #ax0.legend()
+
+        ax1.plot(self.angle.universe, self.angle['left'].mf, 'b', linewidth=1.5, label='Left')
+        ax1.plot(self.angle.universe, self.angle['straight'].mf, 'g', linewidth=1.5, label='Straight')
+        ax1.plot(self.angle.universe, self.angle['right'].mf, 'r', linewidth=1.5, label='Right')
+        ax1.set_title('Angle')
+        ax1.legend()
+
+        ax2.plot(self.speed.universe, self.speed['back'].mf, 'b', linewidth=1.5, label='Back')
+        ax2.plot(self.speed.universe, self.speed['stop'].mf, 'g', linewidth=1.5, label='Stop')
+        ax2.plot(self.speed.universe, self.speed['slow'].mf, 'r', linewidth=1.5, label='Slow')
+        ax2.plot(self.speed.universe, self.speed['fast'].mf, 'orange', linewidth=1.5, label='Fast')
+        ax2.set_title('Speed')
+        ax2.legend()
+
+        # Turn off top/right axes
+        for ax in (ax1, ax2):
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.get_xaxis().tick_bottom()
+            ax.get_yaxis().tick_left()
+
+        plt.tight_layout()
+        plt.show()  # Display the plot
+
 
 # Example of using the FuzzyLogicController
 flc = FuzzyLogicController()
