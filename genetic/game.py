@@ -139,27 +139,7 @@ class AGV:
 
 
     def move(self, action):
-        #if np.array_equal(action, [1, 0, 0]): # turn left sharply
-        #    self.player_angle -= self.turn_force
-        #elif np.array_equal(action, [0, 1, 0]):  # no change
-        #    self.player_angle = self.player_angle 
-        #elif np.array_equal(action, [0, 0, 1]):  # turn right sharply
-        #    self.player_angle += self.turn_force
-
-        if action == 0:
-            self.player_angle -= self.turn_force / 4
-        elif action == 1:
-            self.player_angle = self.player_angle
-        else:
-            self.player_angle += self.turn_force / 4
-        # Ensure player_angle is always between 0 and 360
-        #self.player_angle = self.player_angle % 360
-
-        #if self.player_angle < 0:
-        #    self.player_angle = max(-90, self.player_angle)
-        #else:
-        #    self.player_angle = min(90, self.player_angle)
-
+        self.player_speed = self.player_speed - action
        
         # Move the player
         self.player_pos[0] += self.player_speed * math.sin(math.radians(self.player_angle))
