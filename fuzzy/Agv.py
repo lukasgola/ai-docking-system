@@ -50,7 +50,7 @@ class AGV:
     def reset_spot(self):
         # Parking spot settings
         self.parking_size = 40
-        self.parking_pos = [50, 50]  # Top-left corner of the parking spot
+        self.parking_pos = [40, 45]  # Top-left corner of the parking spot
         self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
 
     def reset_player(self):
@@ -235,12 +235,12 @@ class AGV:
         elif self.is_in_parking_spot(self.player_rect, self.parking_rect):
                 self.screen_text = self.font.render('FINISH', True, self.white)
                 self.finish = True
-                self.speed = 0
                 self.screen.blit(self.screen_text, (self.screen_width // 2 - self.screen_text.get_width() // 2, self.screen_height // 2 - self.screen_text.get_height() // 2))
                 # Wait for 1000 milliseconds
                 pygame.display.flip()  # Update the display
-                pygame.time.delay(1000)  # Wait for 1000 ms
-                self.reset_player()
+                if self.d1 == 20 and self.d2 == 20 and self.d3 == 20:
+                    pygame.time.delay(1000)  # Wait for 1000 ms
+                    self.reset_player()
         else:
             self.screen_text = self.font.render('', True, self.white)
 
