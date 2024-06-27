@@ -14,59 +14,60 @@ class FuzzyLogicController:
         self.dist1 = ctrl.Antecedent(np.arange(0, 800, 1), 'dist1')
         self.dist2 = ctrl.Antecedent(np.arange(0, 800, 1), 'dist2')
         self.dist3 = ctrl.Antecedent(np.arange(0, 800, 1), 'dist3')
-        self.angle = ctrl.Consequent(np.arange(-45, 46, 1), 'angle')
-        self.speed = ctrl.Consequent(np.arange(-3, 6, 1), 'speed')
+        self.speedL = ctrl.Consequent(np.arange(-50, 100, 1), 'speedL')
+        self.speedR = ctrl.Consequent(np.arange(-50, 100, 1), 'speedR')
 
         # Membership functions for distances
-        self.dist1['close'] = fuzz.trimf(self.dist1.universe, [0, 0, 20])
-        self.dist1['ok'] = fuzz.trimf(self.dist1.universe, [10, 20, 30])
-        self.dist1['far'] = fuzz.trimf(self.dist1.universe, [20, 800, 800])
-
-        # Membership functions for angle
-        self.angle['left'] = fuzz.trimf(self.angle.universe, [-60, -60, 0])
-        self.angle['straight'] = fuzz.trimf(self.angle.universe, [-10, 0, 10])
-        self.angle['right'] = fuzz.trimf(self.angle.universe, [0, 60, 60])
+        self.dist1['close'] = fuzz.trimf(self.dist1.universe, [0, 0, 50])
+        self.dist1['ok'] = fuzz.trimf(self.dist1.universe, [40, 60, 80])
+        self.dist1['far'] = fuzz.trimf(self.dist1.universe, [60, 800, 800])
+        
+        self.dist2['close'] = fuzz.trimf(self.dist2.universe, [0, 0, 50])
+        self.dist2['ok'] = fuzz.trimf(self.dist2.universe, [40, 60, 80])
+        self.dist2['far'] = fuzz.trimf(self.dist2.universe, [60, 800, 800])
+        
+        self.dist3['close'] = fuzz.trimf(self.dist3.universe, [0, 0, 50])
+        self.dist3['ok'] = fuzz.trimf(self.dist3.universe, [40, 60, 80])
+        self.dist3['far'] = fuzz.trimf(self.dist3.universe, [60, 800, 800])
 
         # Membership functions for speed
-        self.speed['back'] = fuzz.trimf(self.speed.universe, [-3, -1, -1])
-        self.speed['stop'] = fuzz.trimf(self.speed.universe, [-1, 0, 1])
-        self.speed['slow'] = fuzz.trimf(self.speed.universe, [0, 1, 3])
-        self.speed['fast'] = fuzz.trimf(self.speed.universe, [3, 5, 5])
-        
-        
-        self.dist2['close'] = fuzz.trimf(self.dist2.universe, [0, 0, 20])
-        self.dist2['ok'] = fuzz.trimf(self.dist2.universe, [10, 20, 30])
-        self.dist2['far'] = fuzz.trimf(self.dist2.universe, [20, 800, 800])
-        
-        self.dist3['close'] = fuzz.trimf(self.dist3.universe, [0, 0, 20])
-        self.dist3['ok'] = fuzz.trimf(self.dist3.universe, [10, 20, 30])
-        self.dist3['far'] = fuzz.trimf(self.dist3.universe, [20, 800, 800])
+        self.speedL['back'] = fuzz.trimf(self.speedL.universe, [-50, -10, -10])
+        self.speedL['stop'] = fuzz.trimf(self.speedL.universe, [-15, 0, 15])
+        self.speedL['slow'] = fuzz.trimf(self.speedL.universe, [0, 10, 30])
+        self.speedL['fast'] = fuzz.trimf(self.speedL.universe, [20, 50, 50])
+
+        # Membership functions for speed
+        self.speedR['back'] = fuzz.trimf(self.speedR.universe, [-50, -10, -10])
+        self.speedR['stop'] = fuzz.trimf(self.speedR.universe, [-15, 0, 15])
+        self.speedR['slow'] = fuzz.trimf(self.speedR.universe, [0, 10, 30])
+        self.speedR['fast'] = fuzz.trimf(self.speedR.universe, [20, 40, 40])
 
         
-
-        # Define fuzzy rules
-        rule1 = ctrl.Rule(self.dist1['close'] & self.dist2['close'] & self.dist3['close'], (self.angle['straight'], self.speed['stop']))
-        rule2 = ctrl.Rule(self.dist1['close'] & self.dist2['close'] & self.dist3['far'], (self.angle['right'], self.speed['slow']))
-        rule3 = ctrl.Rule(self.dist1['close'] & self.dist2['far'] & self.dist3['close'], (self.angle['left'], self.speed['slow']))
-        rule4 = ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['close'], (self.angle['straight'], self.speed['fast']))
-        rule5 = ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['close'], (self.angle['right'], self.speed['fast']))
-        rule6 = ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['far'], (self.angle['left'], self.speed['fast']))
-        rule7 = ctrl.Rule(self.dist1['close'] & self.dist2['far'] & self.dist3['far'], (self.angle['straight'], self.speed['fast']))
-        rule8 = ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['far'], (self.angle['left'], self.speed['fast']))
+        # Define fuzzy rules for speedL and speedR
+        rule1 = ctrl.Rule(self.dist1['close'] & self.dist2['close'] & self.dist3['close'], (self.speedL['stop'], self.speedR['stop']))
+        rule2 = ctrl.Rule(self.dist1['close'] & self.dist2['close'] & self.dist3['far'], (self.speedL['slow'], self.speedR['stop']))
+        rule3 = ctrl.Rule(self.dist1['close'] & self.dist2['far'] & self.dist3['close'], (self.speedL['slow'], self.speedR['slow']))
+        rule4 = ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['close'], (self.speedL['slow'], self.speedR['fast']))
+        rule5 = ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['close'], (self.speedL['slow'], self.speedR['stop']))
+        rule6 = ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['far'], (self.speedL['slow'], self.speedR['stop']))
+        rule7 = ctrl.Rule(self.dist1['close'] & self.dist2['far'] & self.dist3['far'], (self.speedL['fast'], self.speedR['fast']))
+        rule8 = ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['far'], (self.speedL['slow'], self.speedR['fast']))
 
         # Additional rules for 'ok' and 'stop'
-        rule9 = ctrl.Rule(self.dist1['ok'] & self.dist2['close'] & self.dist3['close'], (self.angle['straight'], self.speed['back']))
-        rule10 = ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['far'], (self.angle['left'], self.speed['stop']))
-        rule11 = ctrl.Rule(self.dist1['ok'] & self.dist2['far'] & self.dist3['ok'], (self.angle['right'], self.speed['stop']))
-        rule12 = ctrl.Rule(self.dist1['close'] & self.dist2['ok'] & self.dist3['ok'], (self.angle['straight'], self.speed['stop']))
-        rule13 = ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['ok'], (self.angle['straight'], self.speed['stop']))
-        rule14 = ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['ok'], (self.angle['left'], self.speed['slow']))
-        rule15 = ctrl.Rule(self.dist1['ok'] & self.dist2['far'] & self.dist3['far'], (self.angle['straight'], self.speed['fast']))
-        rule16 = ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['ok'], (self.angle['left'], self.speed['slow']))
+        rule9 = ctrl.Rule(self.dist1['ok'] & self.dist2['close'] & self.dist3['close'], (self.speedL['slow'], self.speedR['slow']))
+        rule10 = ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['stop'], self.speedR['slow']))
+        rule11 = ctrl.Rule(self.dist1['ok'] & self.dist2['far'] & self.dist3['ok'], (self.speedL['slow'], self.speedR['stop']))
+        rule12 = ctrl.Rule(self.dist1['close'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['slow'], self.speedR['stop']))
+        rule13 = ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop']))
+        rule14 = ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['slow'], self.speedR['stop']))
+        rule15 = ctrl.Rule(self.dist1['ok'] & self.dist2['far'] & self.dist3['far'], (self.speedL['fast'], self.speedR['fast']))
+        rule16 = ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['ok'], (self.speedL['slow'], self.speedR['fast']))
+        rule17 = ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['stop']))
 
         self.steering_ctrl = ctrl.ControlSystem([
             rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8,
-            rule9, rule10, rule11, rule12, rule13, rule14, rule15, rule16
+            rule9, rule10, rule11, rule12, rule13, rule14, rule15, rule16,
+            rule17
         ])
         self.steering = ctrl.ControlSystemSimulation(self.steering_ctrl)
 
@@ -76,7 +77,7 @@ class FuzzyLogicController:
         self.steering.input['dist3'] = d3
         self.steering.compute()
 
-        return self.steering.output['angle'], self.steering.output['speed']
+        return self.steering.output['speedL'], self.steering.output['speedR']
     
     def show_plot(self):
         # Visualize these universes and membership functions
@@ -89,17 +90,18 @@ class FuzzyLogicController:
         #ax0.set_title('Dist1')
         #ax0.legend()
 
-        ax1.plot(self.angle.universe, self.angle['left'].mf, 'b', linewidth=1.5, label='Left')
-        ax1.plot(self.angle.universe, self.angle['straight'].mf, 'g', linewidth=1.5, label='Straight')
-        ax1.plot(self.angle.universe, self.angle['right'].mf, 'r', linewidth=1.5, label='Right')
-        ax1.set_title('Angle')
+        ax1.plot(self.speedL.universe, self.speedL['back'].mf, 'b', linewidth=1.5, label='Back')
+        ax1.plot(self.speedL.universe, self.speedL['stop'].mf, 'g', linewidth=1.5, label='Stop')
+        ax1.plot(self.speedL.universe, self.speedL['slow'].mf, 'r', linewidth=1.5, label='Slow')
+        ax1.plot(self.speedL.universe, self.speedL['fast'].mf, 'orange', linewidth=1.5, label='Fast')
+        ax1.set_title('SpeedL')
         ax1.legend()
 
-        ax2.plot(self.speed.universe, self.speed['back'].mf, 'b', linewidth=1.5, label='Back')
-        ax2.plot(self.speed.universe, self.speed['stop'].mf, 'g', linewidth=1.5, label='Stop')
-        ax2.plot(self.speed.universe, self.speed['slow'].mf, 'r', linewidth=1.5, label='Slow')
-        ax2.plot(self.speed.universe, self.speed['fast'].mf, 'orange', linewidth=1.5, label='Fast')
-        ax2.set_title('Speed')
+        ax2.plot(self.speedR.universe, self.speedR['back'].mf, 'b', linewidth=1.5, label='Back')
+        ax2.plot(self.speedR.universe, self.speedR['stop'].mf, 'g', linewidth=1.5, label='Stop')
+        ax2.plot(self.speedR.universe, self.speedR['slow'].mf, 'r', linewidth=1.5, label='Slow')
+        ax2.plot(self.speedR.universe, self.speedR['fast'].mf, 'orange', linewidth=1.5, label='Fast')
+        ax2.set_title('SpeedR')
         ax2.legend()
 
         # Turn off top/right axes

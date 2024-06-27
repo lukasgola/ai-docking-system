@@ -192,31 +192,37 @@ class AGV:
             self.player_angle += 5
 
     def fuzzy_move(self, player_angle, player_speed):
-        self.player_angle = player_angle
+        self.player_angle += player_angle
         self.player_speed = player_speed
 
 
     def translate(self, speedL, speedR):
-        angle = (speedL - speedR) # max: 255, min: -255
-        speed = min(speedL, speedR)
+        speedL = speedL / 2
+        speedR = speedR / 2
+        angle = (speedL - speedR) / 10
+        speed = (speedL + speedR) / 10
+
+        #print("SpeedL" + str(speedL*2) + " SpeedR: " + str(speedR*2))
 
         return angle, speed
 
     def play_step(self):
         self.draw_scene()
 
+        print(str(self.d1) + " : " + str(self.d2) + " : " + str(self.d3))
+
         original_pos = self.player_pos[:]
         original_angle = self.player_angle
 
         # Fuzzy logic control
-        angle_action, speed_action = self.fuzzy_logic.compute_action(self.d1, self.d2, self.d3)
+        speedL, speedR = self.fuzzy_logic.compute_action(self.d1, self.d2, self.d3)
 
-        #self.translate(speedL, speedR)
+        angle_action, speed_action = self.translate(speedL, speedR)
 
         self.fuzzy_move(angle_action, speed_action)
 
-        self.player_pos[0] += speed_action * math.sin(math.radians(angle_action))
-        self.player_pos[1] -= speed_action * math.cos(math.radians(angle_action))
+        self.player_pos[0] += self.player_speed * math.sin(math.radians(self.player_angle))
+        self.player_pos[1] -= self.player_speed * math.cos(math.radians(self.player_angle))
 
         self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
         self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
@@ -247,7 +253,7 @@ class AGV:
                 self.screen.blit(self.screen_text, (self.screen_width // 2 - self.screen_text.get_width() // 2, self.screen_height // 2 - self.screen_text.get_height() // 2))
                 # Wait for 1000 milliseconds
                 pygame.display.flip()  # Update the display
-                if self.d1 == 20 and self.d2 == 20 and self.d3 == 20:
+                if self.d1 <= 30 and self.d2 <= 30 and self.d3 <= 30:
                     pygame.time.delay(1000)  # Wait for 1000 ms
                     self.reset_player()
         else:
