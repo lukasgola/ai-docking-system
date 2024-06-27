@@ -49,14 +49,14 @@ class AGV:
 
     def reset_spot(self):
         # Parking spot settings
-        self.parking_size = 40
+        self.parking_size = 100
         self.parking_pos = [40, 45]  # Top-left corner of the parking spot
         self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
 
     def reset_player(self):
         # Player settings
         r = random.randint(1, 4)
-        self.player_size = 20
+        self.player_size = 40
         self.player_pos = [ 50 + 50 * r , self.screen_height - 50]
         self.spawn_points = [(50 + 50 * i, self.screen_height - 50) for i in range(1, 5)]
         self.player_speed = 0
@@ -219,12 +219,13 @@ class AGV:
         speed = (speedL + speedR) / 10
 
         #print(str(speedL*2) + "  :  " + str(speedR*2))
-        print(str(self.d1) + " : " + str(self.d2) + " : " + str(self.d3))
 
         return angle, speed
 
     def play_step(self):
         self.draw_scene()
+
+        print(str(self.d1) + " : " + str(self.d2) + " : " + str(self.d3))
 
         original_pos = self.player_pos[:]
         original_angle = self.player_angle
