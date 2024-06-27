@@ -195,6 +195,13 @@ class AGV:
         self.player_angle = player_angle
         self.player_speed = player_speed
 
+
+    def translate(self, speedL, speedR):
+        angle = (speedL - speedR) # max: 255, min: -255
+        speed = min(speedL, speedR)
+
+        return angle, speed
+
     def play_step(self):
         self.draw_scene()
 
@@ -203,6 +210,8 @@ class AGV:
 
         # Fuzzy logic control
         angle_action, speed_action = self.fuzzy_logic.compute_action(self.d1, self.d2, self.d3)
+
+        #self.translate(speedL, speedR)
 
         self.fuzzy_move(angle_action, speed_action)
 
