@@ -61,11 +61,11 @@ class AGV:
         self.spawn_points = [(50 + 50 * i, self.screen_height - 50) for i in range(1, 5)]
         self.player_speed = 0
         self.player_angle = random.randint(-15, 15)  # Random angle between -15 and 15
-        self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
-        self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
-        self.bottom_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] + self.player_size // 2]
-        self.bottom_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] + self.player_size // 2]
-        self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
+        # self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - self.player_size // 2]
+        # self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - self.player_size // 2]
+        # self.bottom_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] + self.player_size // 2]
+        # self.bottom_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] + self.player_size // 2]
+        # self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
 
 
     def reset_game(self):
@@ -164,6 +164,22 @@ class AGV:
             pygame.draw.rect(self.screen, (255, 255, 255), (spawn_point[0], spawn_point[1], 5, 5))
 
         
+    def draw_player(self):
+        self.top_left = [self.player_pos[0] - self.player_size, self.player_pos[1] - 2 * self.player_size // 2]
+        self.top_right = [self.player_pos[0] + self.player_size, self.player_pos[1] - 2 * self.player_size // 2]
+        self.bottom_left = [self.player_pos[0] - self.player_size, self.player_pos[1] + self.player_size // 2]
+        self.bottom_right = [self.player_pos[0] + self.player_size, self.player_pos[1] + self.player_size // 2]
+
+        origin = self.player_pos
+        self.top_left = self.rotate_point(self.top_left, self.player_angle, origin)
+        self.top_right = self.rotate_point(self.top_right, self.player_angle, origin)
+        self.bottom_left = self.rotate_point(self.bottom_left, self.player_angle, origin)
+        self.bottom_right = self.rotate_point(self.bottom_right, self.player_angle, origin)
+
+        # Draw player
+        self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
+
+
 
     def analog_move(self):
         if self.analog_keys[0] < -0.3:
@@ -202,14 +218,13 @@ class AGV:
         angle = (speedL - speedR) / 10
         speed = (speedL + speedR) / 10
 
-        #print("SpeedL" + str(speedL*2) + " SpeedR: " + str(speedR*2))
+        #print(str(speedL*2) + "  :  " + str(speedR*2))
+        print(str(self.d1) + " : " + str(self.d2) + " : " + str(self.d3))
 
         return angle, speed
 
     def play_step(self):
         self.draw_scene()
-
-        print(str(self.d1) + " : " + str(self.d2) + " : " + str(self.d3))
 
         original_pos = self.player_pos[:]
         original_angle = self.player_angle
@@ -224,19 +239,8 @@ class AGV:
         self.player_pos[0] += self.player_speed * math.sin(math.radians(self.player_angle))
         self.player_pos[1] -= self.player_speed * math.cos(math.radians(self.player_angle))
 
-        self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
-        self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
-        self.bottom_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] + self.player_size // 2]
-        self.bottom_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] + self.player_size // 2]
 
-        origin = self.player_pos
-        self.top_left = self.rotate_point(self.top_left, self.player_angle, origin)
-        self.top_right = self.rotate_point(self.top_right, self.player_angle, origin)
-        self.bottom_left = self.rotate_point(self.bottom_left, self.player_angle, origin)
-        self.bottom_right = self.rotate_point(self.bottom_right, self.player_angle, origin)
-
-        # Draw player
-        self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
+        self.draw_player()
 
         self.draw_sensors(self.top_left, self.top_right, self.bottom_left)
 

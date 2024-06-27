@@ -31,13 +31,13 @@ class FuzzyLogicController:
         self.dist3['far'] = fuzz.trimf(self.dist3.universe, [60, 800, 800])
 
         # Membership functions for speed
-        self.speedL['back'] = fuzz.trimf(self.speedL.universe, [-50, -10, -10])
+        self.speedL['back'] = fuzz.trimf(self.speedL.universe, [-50, -10, 0])
         self.speedL['stop'] = fuzz.trimf(self.speedL.universe, [-15, 0, 15])
         self.speedL['slow'] = fuzz.trimf(self.speedL.universe, [0, 10, 30])
-        self.speedL['fast'] = fuzz.trimf(self.speedL.universe, [20, 50, 50])
+        self.speedL['fast'] = fuzz.trimf(self.speedL.universe, [20, 40, 40])
 
         # Membership functions for speed
-        self.speedR['back'] = fuzz.trimf(self.speedR.universe, [-50, -10, -10])
+        self.speedR['back'] = fuzz.trimf(self.speedR.universe, [-50, -10, 0])
         self.speedR['stop'] = fuzz.trimf(self.speedR.universe, [-15, 0, 15])
         self.speedR['slow'] = fuzz.trimf(self.speedR.universe, [0, 10, 30])
         self.speedR['fast'] = fuzz.trimf(self.speedR.universe, [20, 40, 40])
