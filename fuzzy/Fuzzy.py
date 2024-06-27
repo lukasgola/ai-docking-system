@@ -113,7 +113,3 @@ class FuzzyLogicController:
         plt.show()  # Display the plot
 
 
-# Example of using the FuzzyLogicController
-flc = FuzzyLogicController()
-angle, speed = flc.compute_action(10, 30, 50)
-print(f"Angle: {angle}, Speed: {speed}")
