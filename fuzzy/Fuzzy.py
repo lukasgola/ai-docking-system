@@ -5,8 +5,7 @@ import matplotlib.pyplot as plt
 
 class FuzzyLogicController:
     def __init__(self):
-        #self.setup_fuzzy_logic()
-        self.rotate()
+        self.setup_fuzzy_logic()
         # self.show_plot()
 
     def setup_fuzzy_logic(self):
@@ -23,13 +22,13 @@ class FuzzyLogicController:
         self.dist1['ok'] = fuzz.trapmf(self.dist1.universe, [30, 40, 50, 60])
         self.dist1['far'] = fuzz.trapmf(self.dist1.universe, [50, 60, 790, 800])
 
-        self.dist2['close'] = fuzz.trimf(self.dist2.universe, [0, 0, 60])
-        self.dist2['ok'] = fuzz.trimf(self.dist2.universe, [40, 60, 80])
-        self.dist2['far'] = fuzz.trimf(self.dist2.universe, [60, 800, 800])
-        
-        self.dist3['close'] = fuzz.trimf(self.dist3.universe, [0, 0, 60])
-        self.dist3['ok'] = fuzz.trimf(self.dist3.universe, [40, 60, 80])
-        self.dist3['far'] = fuzz.trimf(self.dist3.universe, [60, 800, 800])
+        self.dist2['close'] = fuzz.trapmf(self.dist1.universe, [0, 0, 50, 60])
+        self.dist2['ok'] = fuzz.trapmf(self.dist1.universe, [50, 60, 70, 80])
+        self.dist2['far'] = fuzz.trapmf(self.dist1.universe, [70, 80, 790, 800])
+
+        self.dist3['close'] = fuzz.trapmf(self.dist1.universe, [0, 0, 50, 60])
+        self.dist3['ok'] = fuzz.trapmf(self.dist1.universe, [50, 60, 70, 80])
+        self.dist3['far'] = fuzz.trapmf(self.dist1.universe, [70, 80, 790, 800])
 
         # Membership functions for speed
         self.speedL['back'] = fuzz.trapmf(self.speedL.universe, [-50, -30, -15, 0])
@@ -53,14 +52,22 @@ class FuzzyLogicController:
             ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['close'], (self.speedL['slow'], self.speedR['back'])),
             ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['close'], (self.speedL['back'], self.speedR['back'])),
 
-            ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['ok'], (self.speedL['back'], self.speedR['stop'])),
+            ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['ok'], (self.speedL['slow'], self.speedR['back'])),
             ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['close'], (self.speedL['stop'], self.speedR['back'])),
             
 
             # Remove duplicate
-            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['stop'], self.speedR['fast'])),
+            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['stop'], self.speedR['back'])),
             ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['ok'], (self.speedL['fast'], self.speedR['stop'])),
-            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop'])),
+            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['back'])),
+            ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['far'], (self.speedL['stop'], self.speedR['back'])),
+
+
+            ctrl.Rule(self.dist1['close'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['back'])),
+            ctrl.Rule(self.dist1['close'] & self.dist2['far'] & self.dist3['far'], (self.speedL['stop'], self.speedR['stop'])),
+            ctrl.Rule(self.dist1['ok'] & self.dist2['far'] & self.dist3['far'], (self.speedL['stop'], self.speedR['stop'])),
+            
+
 
         ]
 
