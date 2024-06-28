@@ -49,23 +49,23 @@ class AGV:
 
     def reset_spot(self):
         # Parking spot settings
-        self.parking_size = 40
-        self.parking_pos = [40, 45]  # Top-left corner of the parking spot
+        self.parking_size = 100
+        self.parking_pos = [40, 60]  # Top-left corner of the parking spot
         self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
 
     def reset_player(self):
         # Player settings
         r = random.randint(1, 4)
-        self.player_size = 20
+        self.player_size = 40
         self.player_pos = [ 50 + 50 * r , self.screen_height - 50]
         self.spawn_points = [(50 + 50 * i, self.screen_height - 50) for i in range(1, 5)]
         self.player_speed = 0
         self.player_angle = random.randint(-15, 15)  # Random angle between -15 and 15
-        self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
-        self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
-        self.bottom_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] + self.player_size // 2]
-        self.bottom_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] + self.player_size // 2]
-        self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
+        # self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - self.player_size // 2]
+        # self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - self.player_size // 2]
+        # self.bottom_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] + self.player_size // 2]
+        # self.bottom_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] + self.player_size // 2]
+        # self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
 
 
     def reset_game(self):
@@ -164,6 +164,22 @@ class AGV:
             pygame.draw.rect(self.screen, (255, 255, 255), (spawn_point[0], spawn_point[1], 5, 5))
 
         
+    def draw_player(self):
+        self.top_left = [self.player_pos[0] - self.player_size, self.player_pos[1] - 2 * self.player_size // 2]
+        self.top_right = [self.player_pos[0] + self.player_size, self.player_pos[1] - 2 * self.player_size // 2]
+        self.bottom_left = [self.player_pos[0] - self.player_size, self.player_pos[1] + self.player_size // 2]
+        self.bottom_right = [self.player_pos[0] + self.player_size, self.player_pos[1] + self.player_size // 2]
+
+        origin = self.player_pos
+        self.top_left = self.rotate_point(self.top_left, self.player_angle, origin)
+        self.top_right = self.rotate_point(self.top_right, self.player_angle, origin)
+        self.bottom_left = self.rotate_point(self.bottom_left, self.player_angle, origin)
+        self.bottom_right = self.rotate_point(self.bottom_right, self.player_angle, origin)
+
+        # Draw player
+        self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
+
+
 
     def analog_move(self):
         if self.analog_keys[0] < -0.3:
@@ -190,38 +206,44 @@ class AGV:
             self.player_angle -= 5
         if keys[pygame.K_d]:
             self.player_angle += 5
+        if keys[pygame.K_r]:
+            self.reset_player()
 
     def fuzzy_move(self, player_angle, player_speed):
-        self.player_angle = player_angle
+        self.player_angle += player_angle
         self.player_speed = player_speed
+
+
+    def translate(self, speedL, speedR):
+        speedL = speedL / 2
+        speedR = speedR / 2
+        angle = (speedL - speedR) / 10
+        speed = (speedL + speedR) / 10
+
+        #print(str(speedL*2) + "  :  " + str(speedR*2))
+
+        return angle, speed
 
     def play_step(self):
         self.draw_scene()
+
+        print(str(self.d1) + " : " + str(self.d2) + " : " + str(self.d3))
 
         original_pos = self.player_pos[:]
         original_angle = self.player_angle
 
         # Fuzzy logic control
-        angle_action, speed_action = self.fuzzy_logic.compute_action(self.d1, self.d2, self.d3)
+        speedL, speedR = self.fuzzy_logic.compute_action(self.d1, self.d2, self.d3)
+
+        angle_action, speed_action = self.translate(speedL, speedR)
 
         self.fuzzy_move(angle_action, speed_action)
 
-        self.player_pos[0] += speed_action * math.sin(math.radians(angle_action))
-        self.player_pos[1] -= speed_action * math.cos(math.radians(angle_action))
+        self.player_pos[0] += self.player_speed * math.sin(math.radians(self.player_angle))
+        self.player_pos[1] -= self.player_speed * math.cos(math.radians(self.player_angle))
 
-        self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
-        self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - 2 * self.player_size // 2]
-        self.bottom_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] + self.player_size // 2]
-        self.bottom_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] + self.player_size // 2]
 
-        origin = self.player_pos
-        self.top_left = self.rotate_point(self.top_left, self.player_angle, origin)
-        self.top_right = self.rotate_point(self.top_right, self.player_angle, origin)
-        self.bottom_left = self.rotate_point(self.bottom_left, self.player_angle, origin)
-        self.bottom_right = self.rotate_point(self.bottom_right, self.player_angle, origin)
-
-        # Draw player
-        self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
+        self.draw_player()
 
         self.draw_sensors(self.top_left, self.top_right, self.bottom_left)
 
@@ -238,7 +260,7 @@ class AGV:
                 self.screen.blit(self.screen_text, (self.screen_width // 2 - self.screen_text.get_width() // 2, self.screen_height // 2 - self.screen_text.get_height() // 2))
                 # Wait for 1000 milliseconds
                 pygame.display.flip()  # Update the display
-                if self.d1 == 20 and self.d2 == 20 and self.d3 == 20:
+                if self.d1 <= 30 and self.d2 <= 30 and self.d3 <= 30:
                     pygame.time.delay(1000)  # Wait for 1000 ms
                     self.reset_player()
         else:

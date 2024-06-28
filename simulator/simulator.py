@@ -247,7 +247,7 @@ class AGV:
                 self.keyboard_move(keys)
 
             
-            #self.play_step(self.player_speed, self.player_angle)
+            self.play_step(self.player_speed, self.player_angle)
                 
             
             
