@@ -57,8 +57,8 @@ class AGV:
         # Player settings
         r = random.randint(1, 4)
         self.player_size = 40
-        self.player_pos = [ 50 + 50 * r , self.screen_height - 50]
-        self.spawn_points = [(50 + 50 * i, self.screen_height - 50) for i in range(1, 5)]
+        self.player_pos = [ 150 + 50 * r , self.screen_height - 50]
+        self.spawn_points = [(150 + 50 * i, self.screen_height - 50) for i in range(1, 5)]
         self.player_speed = 0
         self.player_angle = random.randint(-15, 15)  # Random angle between -15 and 15
         # self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - self.player_size // 2]
