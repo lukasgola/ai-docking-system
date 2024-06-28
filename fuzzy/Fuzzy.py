@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 
 class FuzzyLogicController:
     def __init__(self):
-        self.setup_fuzzy_logic()
+        #self.setup_fuzzy_logic()
+        self.rotate()
         # self.show_plot()
 
     def setup_fuzzy_logic(self):
@@ -54,13 +55,14 @@ class FuzzyLogicController:
 
             ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['ok'], (self.speedL['back'], self.speedR['stop'])),
             ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['close'], (self.speedL['stop'], self.speedR['back'])),
-            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop'])),
+            
 
             # Remove duplicate
             ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['stop'], self.speedR['fast'])),
             ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['ok'], (self.speedL['fast'], self.speedR['stop'])),
-        ]
+            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop'])),
 
+        ]
 
         # Initialize the control system with the list of rules
         self.steering_ctrl = ctrl.ControlSystem(rules)

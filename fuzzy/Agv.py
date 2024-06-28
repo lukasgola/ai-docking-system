@@ -3,6 +3,7 @@ import sys
 import math
 import random
 from Fuzzy import FuzzyLogicController
+import Fuzzy_Rotate
 
 MAX_SPEED = 5
 
@@ -14,6 +15,8 @@ class AGV:
         self.screen_height = 600
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         pygame.display.set_caption('AGV Simulator')
+
+        self.iteration = 0
 
         self.font = pygame.font.SysFont(None, 55)
         self.small_font = pygame.font.SysFont(None, 20)
@@ -44,6 +47,7 @@ class AGV:
         self.screen_text = ''
 
         self.fuzzy_logic = FuzzyLogicController()
+        self.fuzzy_rotate = Fuzzy_Rotate()
 
         self.reset_game()
 
@@ -57,10 +61,13 @@ class AGV:
         # Player settings
         r = random.randint(1, 4)
         self.player_size = 40
-        self.player_pos = [ 150 + 50 * r , self.screen_height - 50]
+        self.player_pos = [120, self.screen_height - 200]
+        # self.player_pos = [ 150 + 50 * r , self.screen_height - 50]
         self.spawn_points = [(150 + 50 * i, self.screen_height - 50) for i in range(1, 5)]
         self.player_speed = 0
-        self.player_angle = random.randint(-15, 15)  # Random angle between -15 and 15
+        self.player_angle = -90
+        # self.player_angle = random.randint(-15, 15)  # Random angle between -15 and 15
+
         # self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - self.player_size // 2]
         # self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - self.player_size // 2]
         # self.bottom_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] + self.player_size // 2]
@@ -232,8 +239,14 @@ class AGV:
         original_pos = self.player_pos[:]
         original_angle = self.player_angle
 
+        
+        if self.iteration > 10:
+            prevDist = self.d1
+        else:
+            self.iteration += 1
+
         # Fuzzy logic control
-        speedL, speedR = self.fuzzy_logic.compute_action(self.d1, self.d2, self.d3)
+        speedL, speedR = self.fuzzy_rotate.compute_action(self.d1, prevDist)
 
         angle_action, speed_action = self.translate(speedL, speedR)
 
