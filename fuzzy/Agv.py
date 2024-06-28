@@ -50,7 +50,7 @@ class AGV:
     def reset_spot(self):
         # Parking spot settings
         self.parking_size = 100
-        self.parking_pos = [40, 45]  # Top-left corner of the parking spot
+        self.parking_pos = [40, 60]  # Top-left corner of the parking spot
         self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
 
     def reset_player(self):
@@ -206,6 +206,8 @@ class AGV:
             self.player_angle -= 5
         if keys[pygame.K_d]:
             self.player_angle += 5
+        if keys[pygame.K_r]:
+            self.reset_player()
 
     def fuzzy_move(self, player_angle, player_speed):
         self.player_angle += player_angle

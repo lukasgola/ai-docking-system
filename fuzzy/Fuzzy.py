@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 class FuzzyLogicController:
     def __init__(self):
         self.setup_fuzzy_logic()
-        self.show_plot()
+        # self.show_plot()
 
     def setup_fuzzy_logic(self):
         
@@ -54,22 +54,22 @@ class FuzzyLogicController:
 
         # Additional rules for 'ok' and 'stop'
         rule9 = ctrl.Rule(self.dist1['ok'] & self.dist2['close'] & self.dist3['close'], (self.speedL['slow'], self.speedR['slow']))
-        rule10 = ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['stop']))
+        rule10 = ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['back']))
         rule11 = ctrl.Rule(self.dist1['ok'] & self.dist2['far'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop']))
         rule12 = ctrl.Rule(self.dist1['close'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['slow'], self.speedR['stop']))
         rule13 = ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop']))
         rule14 = ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['slow'], self.speedR['stop']))
-        rule15 = ctrl.Rule(self.dist1['ok'] & self.dist2['far'] & self.dist3['far'], (self.speedL['back'], self.speedR['back']))
+        rule15 = ctrl.Rule(self.dist1['ok'] & self.dist2['far'] & self.dist3['far'], (self.speedL['fast'], self.speedR['fast']))
         rule16 = ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['ok'], (self.speedL['slow'], self.speedR['fast']))
-        rule17 = ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['fast'], self.speedR['stop']))
-        rule18 = ctrl.Rule(self.dist1['ok'] & self.dist2['close'] & self.dist3['far'], (self.speedL['slow'], self.speedR['stop']))
-        rule19 = ctrl.Rule(self.dist1['close'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['back'], self.speedR['back']))
+        rule17 = ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['back']))
+        rule18 = ctrl.Rule(self.dist1['ok'] & self.dist2['close'] & self.dist3['far'], (self.speedL['slow'], self.speedR['back']))
+        rule19 = ctrl.Rule(self.dist1['close'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['stop']))
         rule20 = ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['ok'], (self.speedL['fast'], self.speedR['stop']))
         rule21 = ctrl.Rule(self.dist1['close'] & self.dist2['close'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop']))
-        rule22 = ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['close'], (self.speedL['fast'], self.speedR['stop']))
+        rule22 = ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['close'], (self.speedL['slow'], self.speedR['back']))
         rule23 = ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['far'], (self.speedL['fast'], self.speedR['stop']))
         rule24 = ctrl.Rule(self.dist1['close'] & self.dist2['close'] & self.dist3['far'], (self.speedL['stop'], self.speedR['slow']))
-        rule25 = ctrl.Rule(self.dist1['close'] & self.dist2['far'] & self.dist3['far'], (self.speedL['back'], self.speedR['back']))
+        rule25 = ctrl.Rule(self.dist1['close'] & self.dist2['far'] & self.dist3['far'], (self.speedL['fast'], self.speedR['fast']))
         rule26 = ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['close'], (self.speedL['stop'], self.speedR['stop']))
         rule27 = ctrl.Rule(self.dist1['ok'] & self.dist2['close'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop']))
 
