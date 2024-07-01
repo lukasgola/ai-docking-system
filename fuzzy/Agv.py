@@ -285,9 +285,9 @@ class AGV:
                 self.screen.blit(self.screen_text, (self.screen_width // 2 - self.screen_text.get_width() // 2, self.screen_height // 2 - self.screen_text.get_height() // 2))
                 # Wait for 1000 milliseconds
                 pygame.display.flip()  # Update the display
-                if self.d1 <= 60 and self.d2 <= 60 and self.d3 <= 60:
-                    pygame.time.delay(1000)  # Wait for 1000 ms
-                    self.reset_player()
+                # if self.d1 <= 60 and self.d2 <= 60 and self.d3 <= 60:
+                #     pygame.time.delay(1000)  # Wait for 1000 ms
+                #     self.reset_player()
         else:
             self.screen_text = self.font.render('', True, self.white)
 
