@@ -246,7 +246,7 @@ class AGV:
         original_angle = self.player_angle
 
         if self.iteration == 15:
-            # print( str(self.iteration) + " : " + str(self.prev_d1) + " : " + str(self.d1))
+            #print( str(self.iteration) + " : " + str(self.prev_d1) + " : " + str(self.d1))
             self.prev_d1 = self.d1
             self.iteration = 0
         else:
@@ -255,9 +255,11 @@ class AGV:
     
 
         # Fuzzy logic control
-        if self.mode == 1 or self.d1 < 60 and self.d2 - self.d1 > 10:
+        if self.mode == 1 or self.d1 < 60 and self.d2 - self.d1 > 10 and self.d2 > 60 and self.d3 > 60  :
+            print("Mode 1")
             speedL, speedR = self.fuzzy_parallel.compute_action(self.d1 - self.prev_d1)
         else:
+            print("Mode 2")
             speedL, speedR = self.fuzzy_logic.compute_action(self.d1, self.d2, self.d3)
 
         angle_action, speed_action = self.translate(speedL, speedR)

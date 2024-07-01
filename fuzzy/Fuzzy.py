@@ -66,6 +66,11 @@ class FuzzyLogicController:
             ctrl.Rule(self.dist1['close'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['back'])),
             ctrl.Rule(self.dist1['close'] & self.dist2['far'] & self.dist3['far'], (self.speedL['stop'], self.speedR['stop'])),
             ctrl.Rule(self.dist1['ok'] & self.dist2['far'] & self.dist3['far'], (self.speedL['stop'], self.speedR['stop'])),
+
+            ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop'])),
+            ctrl.Rule(self.dist1['close'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop'])),
+            ctrl.Rule(self.dist1['ok'] & self.dist2['close'] & self.dist3['close'], (self.speedL['back'], self.speedR['back'])),
+            
             
 
 
