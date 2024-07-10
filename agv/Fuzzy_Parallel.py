@@ -17,7 +17,7 @@ class FuzzyParallelLogicController:
         self.speedR = ctrl.Consequent(np.arange(-50, 100, 1), 'speedR')
 
         # Membership functions for difference
-        self.diff['negative'] = fuzz.trapmf(self.diff.universe, [-800, -800, -20, -1])
+        self.diff['negative'] = fuzz.trapmf(self.diff.universe, [-5000, -5000, -20, -1])
         self.diff['zero'] = fuzz.trimf(self.diff.universe, [-2, 0, 2])
         self.diff['positive'] = fuzz.trapmf(self.diff.universe, [1, 20, 800, 800])
 

@@ -87,11 +87,11 @@ class MotorSensorController:
             # Replace this with actual fuzzy logic control
 
             if self.iteration == 3:
-                #print( str(self.iteration) + " : " + str(self.prev_d1) + " : " + str(self.d1))
                 self.prev_d1 = d1
                 self.iteration = 0
             else:
                 self.iteration += 1
+            
 
             if self.mode == 1:
                 speedL, speedR = self.fuzzy_logic.compute_action(d1, d2, d3)
