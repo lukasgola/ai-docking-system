@@ -1,6 +1,10 @@
 import socket
 import time
 
+from Fuzzy import FuzzyLogicController
+from Fuzzy_Parallel import FuzzyParallelLogicController
+from FuzzyRotate import FuzzyRotateLogicController
+
 UDP_IP_MOVE = "192.168.1.100"
 UDP_IP = "192.168.1.200"
 UDP_PORT = 4000
@@ -8,6 +12,10 @@ MESSAGE = bytes([0xFF, 0x88, 0xFF, 0x88])
 MESSAGE_STOP = bytes([0xFF, 0xFF, 0xFF, 0xFF])
 
 STOP_FLAG = True
+
+fuzzy_logic = FuzzyLogicController()
+fuzzy_rotate = FuzzyRotateLogicController()
+fuzzy_parallel = FuzzyParallelLogicController()
 
 
 def move():
@@ -67,4 +75,4 @@ def send_udp_data():
 # Call the function every second
 while STOP_FLAG:
     send_udp_data()
-    #move()
+    move()
