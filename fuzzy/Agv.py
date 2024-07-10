@@ -266,7 +266,11 @@ class AGV:
             speedL, speedR = self.fuzzy_rotate.compute_action(self.d1, self.d2, self.d3)
         elif self.mode == 3:
             print("Parallel")
-            speedL, speedR = self.fuzzy_parallel.compute_action(self.d1 - self.prev_d1)
+            speedL, speedR = self.fuzzy_parallel.compute_action(self.d1 - self.prev_d1, self.d2, self.d3)
+        elif self.mode == 0:
+            speedL = 0
+            speedR = 0
+            self.mode = 1
         else:
             print("Logic")
             speedL, speedR = self.fuzzy_logic.compute_action(self.d1, self.d2, self.d3)

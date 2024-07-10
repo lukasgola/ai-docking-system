@@ -22,13 +22,13 @@ class FuzzyLogicController:
         self.dist1['ok'] = fuzz.trapmf(self.dist1.universe, [30, 40, 50, 60])
         self.dist1['far'] = fuzz.trapmf(self.dist1.universe, [50, 60, 790, 800])
 
-        self.dist2['close'] = fuzz.trapmf(self.dist1.universe, [0, 0, 50, 60])
-        self.dist2['ok'] = fuzz.trapmf(self.dist1.universe, [50, 60, 70, 80])
-        self.dist2['far'] = fuzz.trapmf(self.dist1.universe, [70, 80, 790, 800])
+        self.dist2['close'] = fuzz.trapmf(self.dist2.universe, [0, 0, 50, 60])
+        self.dist2['ok'] = fuzz.trapmf(self.dist2.universe, [50, 60, 70, 80])
+        self.dist2['far'] = fuzz.trapmf(self.dist2.universe, [70, 80, 790, 800])
 
-        self.dist3['close'] = fuzz.trapmf(self.dist1.universe, [0, 0, 50, 60])
-        self.dist3['ok'] = fuzz.trapmf(self.dist1.universe, [50, 60, 70, 80])
-        self.dist3['far'] = fuzz.trapmf(self.dist1.universe, [70, 80, 790, 800])
+        self.dist3['close'] = fuzz.trapmf(self.dist3.universe, [0, 0, 50, 60])
+        self.dist3['ok'] = fuzz.trapmf(self.dist3.universe, [50, 60, 70, 80])
+        self.dist3['far'] = fuzz.trapmf(self.dist3.universe, [70, 80, 790, 800])
 
         # Membership functions for speed
         self.speedL['back'] = fuzz.trapmf(self.speedL.universe, [-50, -30, -15, 0])
@@ -72,8 +72,6 @@ class FuzzyLogicController:
             # ctrl.Rule(self.dist1['ok'] & self.dist2['close'] & self.dist3['close'], (self.speedL['back'], self.speedR['back'])),
             
             
-
-
         ]
 
         # Initialize the control system with the list of rules
