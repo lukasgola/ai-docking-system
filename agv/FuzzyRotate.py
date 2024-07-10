@@ -11,47 +11,45 @@ class FuzzyRotateLogicController:
     def setup_fuzzy_logic(self):
         
         # Define fuzzy variables
-        self.dist1 = ctrl.Antecedent(np.arange(0, 800, 1), 'dist1')
-        self.dist2 = ctrl.Antecedent(np.arange(0, 800, 1), 'dist2')
-        self.dist3 = ctrl.Antecedent(np.arange(0, 800, 1), 'dist3')
+        self.dist1 = ctrl.Antecedent(np.arange(0, 5000, 1), 'dist1')
+        self.dist2 = ctrl.Antecedent(np.arange(0, 5000, 1), 'dist2')
+        self.dist3 = ctrl.Antecedent(np.arange(0, 5000, 1), 'dist3')
         self.speedL = ctrl.Consequent(np.arange(-50, 100, 1), 'speedL')
         self.speedR = ctrl.Consequent(np.arange(-50, 100, 1), 'speedR')
 
         # Membership functions for distances
-        self.dist1['close'] = fuzz.trapmf(self.dist1.universe, [0, 0, 50, 60])
-        self.dist1['ok'] = fuzz.trapmf(self.dist1.universe, [50, 60, 70, 80])
-        self.dist1['far'] = fuzz.trapmf(self.dist1.universe, [70, 80, 790, 800])
+        self.dist1['close'] = fuzz.trapmf(self.dist1.universe, [0, 0, 150, 160])
+        self.dist1['ok'] = fuzz.trapmf(self.dist1.universe, [150, 200, 250, 300])
+        self.dist1['far'] = fuzz.trapmf(self.dist1.universe, [250, 300, 4900, 5000])
 
-        self.dist2['close'] = fuzz.trapmf(self.dist1.universe, [0, 0, 50, 60])
-        self.dist2['ok'] = fuzz.trapmf(self.dist1.universe, [50, 60, 70, 80])
-        self.dist2['far'] = fuzz.trapmf(self.dist1.universe, [70, 80, 790, 800])
+        self.dist2['close'] = fuzz.trapmf(self.dist2.universe, [0, 0, 150, 160])
+        self.dist2['ok'] = fuzz.trapmf(self.dist2.universe, [150, 200, 250, 300])
+        self.dist2['far'] = fuzz.trapmf(self.dist2.universe, [250, 300, 4900, 5000])
 
-        self.dist3['close'] = fuzz.trapmf(self.dist1.universe, [0, 0, 50, 60])
-        self.dist3['ok'] = fuzz.trapmf(self.dist1.universe, [50, 60, 70, 80])
-        self.dist3['far'] = fuzz.trapmf(self.dist1.universe, [70, 80, 790, 800])
+        self.dist3['close'] = fuzz.trapmf(self.dist3.universe, [0, 0, 150, 160])
+        self.dist3['ok'] = fuzz.trapmf(self.dist3.universe, [150, 200, 250, 300])
+        self.dist3['far'] = fuzz.trapmf(self.dist3.universe, [250, 300, 4900, 5000])
 
         # Membership functions for speed
-        self.speedL['back'] = fuzz.trapmf(self.speedL.universe, [-50, -30, -15, 0])
+        self.speedL['back'] = fuzz.trapmf(self.speedL.universe, [-30, -20, -10, 0])
         self.speedL['stop'] = fuzz.trapmf(self.speedL.universe, [-15, -5, 5, 15])
         self.speedL['slow'] = fuzz.trapmf(self.speedL.universe, [0, 10, 20, 30])
-        self.speedL['fast'] = fuzz.trapmf(self.speedL.universe, [20, 30, 40, 50])
 
-        self.speedR['back'] = fuzz.trapmf(self.speedR.universe, [-50, -30, -15, 0])
+        self.speedR['back'] = fuzz.trapmf(self.speedR.universe, [-30, -20, -10, 0])
         self.speedR['stop'] = fuzz.trapmf(self.speedR.universe, [-15, -5, 5, 15])
         self.speedR['slow'] = fuzz.trapmf(self.speedR.universe, [0, 10, 20, 30])
-        self.speedR['fast'] = fuzz.trapmf(self.speedR.universe, [20, 30, 40, 50])
 
         
         # Define fuzzy rules for speedL and speedR
         rules = [
-            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['back'])),
+            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['slow'], self.speedR['back'])),
             ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['back'])),
-            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['close'], (self.speedL['stop'], self.speedR['back'])),
+            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['close'], (self.speedL['slow'], self.speedR['back'])),
             ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['far'], (self.speedL['stop'], self.speedR['back'])),
-            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['stop'], self.speedR['back'])),
-            ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['far'], (self.speedL['slow'], self.speedR['stop'])),
+            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['back'])),
+            ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['far'], (self.speedL['slow'], self.speedR['back'])),
 
-            ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['back'])),
+            ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['stop'])),
             ctrl.Rule(self.dist1['close'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['back'])),
             ctrl.Rule(self.dist1['ok'] & self.dist2['far'] & self.dist3['far'], (self.speedL['stop'], self.speedR['stop'])),
             ctrl.Rule(self.dist1['close'] & self.dist2['far'] & self.dist3['far'], (self.speedL['stop'], self.speedR['stop'])),

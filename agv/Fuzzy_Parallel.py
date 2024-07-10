@@ -10,9 +10,9 @@ class FuzzyParallelLogicController:
 
     def setup_fuzzy_logic(self):
         # Define fuzzy variables
-        self.diff = ctrl.Antecedent(np.arange(-800, 800, 1), 'diff')
-        self.dist2 = ctrl.Antecedent(np.arange(0, 800, 1), 'dist2')
-        self.dist3 = ctrl.Antecedent(np.arange(0, 800, 1), 'dist3')
+        self.diff = ctrl.Antecedent(np.arange(-5000, 5000, 1), 'diff')
+        self.dist2 = ctrl.Antecedent(np.arange(0, 5000, 1), 'dist2')
+        self.dist3 = ctrl.Antecedent(np.arange(0, 5000, 1), 'dist3')
         self.speedL = ctrl.Consequent(np.arange(-50, 100, 1), 'speedL')
         self.speedR = ctrl.Consequent(np.arange(-50, 100, 1), 'speedR')
 
@@ -21,15 +21,13 @@ class FuzzyParallelLogicController:
         self.diff['zero'] = fuzz.trimf(self.diff.universe, [-2, 0, 2])
         self.diff['positive'] = fuzz.trapmf(self.diff.universe, [1, 20, 800, 800])
 
-        # Membership functions for dist2
-        self.dist2['close'] = fuzz.trapmf(self.dist2.universe, [0, 0, 50, 60])
-        self.dist2['ok'] = fuzz.trapmf(self.dist2.universe, [50, 60, 70, 80])
-        self.dist2['far'] = fuzz.trapmf(self.dist2.universe, [70, 80, 790, 800])
+        self.dist2['close'] = fuzz.trapmf(self.dist2.universe, [0, 0, 150, 160])
+        self.dist2['ok'] = fuzz.trapmf(self.dist2.universe, [150, 200, 250, 300])
+        self.dist2['far'] = fuzz.trapmf(self.dist2.universe, [250, 300, 4900, 5000])
 
-        # Membership functions for dist3
-        self.dist3['close'] = fuzz.trapmf(self.dist3.universe, [0, 0, 50, 60])
-        self.dist3['ok'] = fuzz.trapmf(self.dist3.universe, [50, 60, 70, 80])
-        self.dist3['far'] = fuzz.trapmf(self.dist3.universe, [70, 80, 790, 800])
+        self.dist3['close'] = fuzz.trapmf(self.dist3.universe, [0, 0, 150, 160])
+        self.dist3['ok'] = fuzz.trapmf(self.dist3.universe, [150, 200, 250, 300])
+        self.dist3['far'] = fuzz.trapmf(self.dist3.universe, [250, 300, 4900, 5000])
 
         # Membership functions for speed
         self.speedL['back'] = fuzz.trimf(self.speedL.universe, [-50, -20, 0])
@@ -46,6 +44,7 @@ class FuzzyParallelLogicController:
         rules = [
             # Rules combining diff with dist2 and dist3 conditions
             ctrl.Rule(self.diff['negative'] & (self.dist2['far'] & self.dist3['far']), (self.speedL['fast'], self.speedR['slow'])),
+            ctrl.Rule(self.diff['negative'] & (self.dist2['ok'] & self.dist3['far']), (self.speedL['fast'], self.speedR['slow'])),
             ctrl.Rule(self.diff['zero'] & (self.dist2['far'] & self.dist3['far']), (self.speedL['fast'], self.speedR['fast'])),
             ctrl.Rule(self.diff['positive'] & (self.dist2['far'] & self.dist3['far']), (self.speedL['slow'], self.speedR['fast'])),
 

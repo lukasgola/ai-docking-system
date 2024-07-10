@@ -11,24 +11,24 @@ class FuzzyLogicController:
     def setup_fuzzy_logic(self):
         
         # Define fuzzy variables
-        self.dist1 = ctrl.Antecedent(np.arange(0, 800, 1), 'dist1')
-        self.dist2 = ctrl.Antecedent(np.arange(0, 800, 1), 'dist2')
-        self.dist3 = ctrl.Antecedent(np.arange(0, 800, 1), 'dist3')
+        self.dist1 = ctrl.Antecedent(np.arange(0, 5000, 1), 'dist1')
+        self.dist2 = ctrl.Antecedent(np.arange(0, 5000, 1), 'dist2')
+        self.dist3 = ctrl.Antecedent(np.arange(0, 5000, 1), 'dist3')
         self.speedL = ctrl.Consequent(np.arange(-50, 100, 1), 'speedL')
         self.speedR = ctrl.Consequent(np.arange(-50, 100, 1), 'speedR')
 
         # Membership functions for distances
-        self.dist1['close'] = fuzz.trapmf(self.dist1.universe, [0, 0, 30, 40])
-        self.dist1['ok'] = fuzz.trapmf(self.dist1.universe, [30, 40, 50, 60])
-        self.dist1['far'] = fuzz.trapmf(self.dist1.universe, [50, 60, 790, 800])
+        self.dist1['close'] = fuzz.trapmf(self.dist1.universe, [0, 0, 150, 160])
+        self.dist1['ok'] = fuzz.trapmf(self.dist1.universe, [150, 200, 250, 300])
+        self.dist1['far'] = fuzz.trapmf(self.dist1.universe, [250, 300, 4900, 5000])
 
-        self.dist2['close'] = fuzz.trapmf(self.dist2.universe, [0, 0, 50, 60])
-        self.dist2['ok'] = fuzz.trapmf(self.dist2.universe, [50, 60, 70, 80])
-        self.dist2['far'] = fuzz.trapmf(self.dist2.universe, [70, 80, 790, 800])
+        self.dist2['close'] = fuzz.trapmf(self.dist2.universe, [0, 0, 150, 160])
+        self.dist2['ok'] = fuzz.trapmf(self.dist2.universe, [150, 200, 250, 300])
+        self.dist2['far'] = fuzz.trapmf(self.dist2.universe, [250, 300, 4900, 5000])
 
-        self.dist3['close'] = fuzz.trapmf(self.dist3.universe, [0, 0, 50, 60])
-        self.dist3['ok'] = fuzz.trapmf(self.dist3.universe, [50, 60, 70, 80])
-        self.dist3['far'] = fuzz.trapmf(self.dist3.universe, [70, 80, 790, 800])
+        self.dist3['close'] = fuzz.trapmf(self.dist3.universe, [0, 0, 150, 160])
+        self.dist3['ok'] = fuzz.trapmf(self.dist3.universe, [150, 200, 250, 300])
+        self.dist3['far'] = fuzz.trapmf(self.dist3.universe, [250, 300, 4900, 5000])
 
         # Membership functions for speed
         self.speedL['back'] = fuzz.trapmf(self.speedL.universe, [-50, -30, -15, 0])
