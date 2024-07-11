@@ -31,13 +31,13 @@ class FuzzyRotateLogicController:
         self.dist3['far'] = fuzz.trapmf(self.dist3.universe, [250, 300, 4900, 5000])
 
         # Membership functions for speed
-        self.speedL['back'] = fuzz.trapmf(self.speedL.universe, [-30, -20, -10, 0])
-        self.speedL['stop'] = fuzz.trapmf(self.speedL.universe, [-15, -5, 5, 15])
-        self.speedL['slow'] = fuzz.trapmf(self.speedL.universe, [0, 10, 20, 30])
+        self.speedL['back'] = fuzz.trapmf(self.speedL.universe, [-20, -10, -5, 0])
+        self.speedL['stop'] = fuzz.trapmf(self.speedL.universe, [-5, -2, 2, 5])
+        self.speedL['slow'] = fuzz.trapmf(self.speedL.universe, [0, 5, 10, 20])
 
-        self.speedR['back'] = fuzz.trapmf(self.speedR.universe, [-30, -20, -10, 0])
-        self.speedR['stop'] = fuzz.trapmf(self.speedR.universe, [-15, -5, 5, 15])
-        self.speedR['slow'] = fuzz.trapmf(self.speedR.universe, [0, 10, 20, 30])
+        self.speedR['back'] = fuzz.trapmf(self.speedR.universe, [-20, -10, -5, 0])
+        self.speedR['stop'] = fuzz.trapmf(self.speedR.universe, [-5, -2, 2, 5])
+        self.speedR['slow'] = fuzz.trapmf(self.speedR.universe, [0, 5, 10, 20])
 
         
         # Define fuzzy rules for speedL and speedR

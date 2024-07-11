@@ -1,6 +1,7 @@
 import socket
 import time
 import numpy as np
+import pandas as pd
 
 from Fuzzy import FuzzyLogicController
 from Fuzzy_Parallel import FuzzyParallelLogicController
@@ -18,6 +19,8 @@ class MotorSensorController:
         self.iteration = 0
         self.mode = 1
         self.prev_d1 = 0
+
+        self.rekord = []
 
         # Inicjalizacja kontrolerów fuzzy
         self.fuzzy_logic = FuzzyLogicController()
@@ -77,6 +80,7 @@ class MotorSensorController:
             d2 = int(values[2])
             d3 = int(values[3])
             print(f"{d1}, {d2}, {d3}")
+            self.rekord.append([d1, d2, d3, self.speed_L, self.speed_R])
             return d1, d2, d3
         except socket.timeout:
             print("Brak odpowiedzi, przekroczono czas oczekiwania")
@@ -94,14 +98,17 @@ class MotorSensorController:
             
 
             if self.mode == 1:
+                print("Mode: 1")
                 speedL, speedR = self.fuzzy_logic.compute_action(d1, d2, d3)
-                if d2 > 150 and d2 < 200 and d3 > 150 and d3 < 250:
+                if d2 > 150 and d2 < 250 and d3 > 150 and d3 < 250:
                     self.mode = 2
             elif self.mode == 2:
+                print("Mode: 2")
                 speedL, speedR = self.fuzzy_rotate.compute_action(d1, d2, d3)
                 if d2 > 250 and d3 > 250 and d1 < 350:
                     self.mode = 3
             elif self.mode == 3:
+                print("Mode: 3")
                 speedL, speedR = self.fuzzy_parallel.compute_action(d1 - self.prev_d1, d2, d3)
             
             
@@ -119,11 +126,14 @@ class MotorSensorController:
             time.sleep(0.01)
         self.client.close()
 
+        # df = pd.DataFrame(self.rekord, columns=['d1','d2','d3', 'speed_L', 'speed_R'])
+        # df.to_excel('4_30.xlsx')
+
 if __name__ == "__main__":
-    mot_host = "192.168.0.101"
+    mot_host = "192.168.0.100"
     mot_port = 4000
-    sen_host = "192.168.0.102"
+    sen_host = "192.168.0.101"
     sen_port = 4000
 
     controller = MotorSensorController(mot_host, mot_port, sen_host, sen_port)
-    controller.run(2000)
+    controller.run(200)
