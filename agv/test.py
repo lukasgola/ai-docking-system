@@ -131,9 +131,9 @@ class MotorSensorController:
         # df.to_excel('4_30.xlsx')
 
 if __name__ == "__main__":
-    mot_host = "192.168.0.100"
+    mot_host = "192.168.0.101"
     mot_port = 4000
-    sen_host = "192.168.0.101"
+    sen_host = "192.168.0.100"
     sen_port = 4000
 
     controller = MotorSensorController(mot_host, mot_port, sen_host, sen_port)
