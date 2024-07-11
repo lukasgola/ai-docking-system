@@ -116,14 +116,15 @@ class MotorSensorController:
             self.speed_R = speedR
 
     def run(self, iterations):
-        for i in range(iterations):
+        # for i in range(iterations):
+        while True:
             # print(f"Updated speeds: speedL={self.speed_L}, speedR={self.speed_R}")
             self.send_motor_command()
             self.receive_motor_response()
             self.send_sensor_command()
             d1, d2, d3 = self.receive_sensor_response()
             self.update_speeds(d1, d2, d3)
-            time.sleep(0.01)
+            time.sleep(0.001)
         self.client.close()
 
         # df = pd.DataFrame(self.rekord, columns=['d1','d2','d3', 'speed_L', 'speed_R'])
