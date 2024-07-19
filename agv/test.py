@@ -116,8 +116,8 @@ class MotorSensorController:
             self.speed_R = speedR
 
     def run(self, iterations):
-        # for i in range(iterations):
-        while True:
+        for i in range(iterations):
+        # while True:
             # print(f"Updated speeds: speedL={self.speed_L}, speedR={self.speed_R}")
             self.send_motor_command()
             self.receive_motor_response()
@@ -127,8 +127,8 @@ class MotorSensorController:
             time.sleep(0.001)
         self.client.close()
 
-        # df = pd.DataFrame(self.rekord, columns=['d1','d2','d3', 'speed_L', 'speed_R'])
-        # df.to_excel('4_30.xlsx')
+        df = pd.DataFrame(self.rekord, columns=['d1','d2','d3', 'speed_L', 'speed_R'])
+        df.to_excel('4_-30_3.xlsx')
 
 if __name__ == "__main__":
     mot_host = "192.168.0.101"
@@ -137,4 +137,4 @@ if __name__ == "__main__":
     sen_port = 4000
 
     controller = MotorSensorController(mot_host, mot_port, sen_host, sen_port)
-    controller.run(200)
+    controller.run(160)
