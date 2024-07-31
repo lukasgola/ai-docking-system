@@ -43,41 +43,40 @@ class FuzzyLogicController:
 
         
         # Define fuzzy rules for speedL and speedR
-        rule1 = ctrl.Rule(self.dist1['close'] & self.dist2['close'] & self.dist3['close'], (self.speedL['back'], self.speedR['back']))
-        rule2 = ctrl.Rule(self.dist1['close'] & self.dist2['close'] & self.dist3['far'], (self.speedL['slow'], self.speedR['stop']))
-        rule3 = ctrl.Rule(self.dist1['close'] & self.dist2['far'] & self.dist3['close'], (self.speedL['slow'], self.speedR['slow']))
-        rule4 = ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['close'], (self.speedL['slow'], self.speedR['fast']))
-        rule5 = ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['close'], (self.speedL['slow'], self.speedR['stop']))
-        rule6 = ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['far'], (self.speedL['slow'], self.speedR['stop']))
-        rule7 = ctrl.Rule(self.dist1['close'] & self.dist2['far'] & self.dist3['far'], (self.speedL['fast'], self.speedR['fast']))
-        rule8 = ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['far'], (self.speedL['slow'], self.speedR['fast']))
+        rules = [
+            ctrl.Rule(self.dist1['close'] & self.dist2['close'] & self.dist3['close'], (self.speedL['back'], self.speedR['back'])),
+            ctrl.Rule(self.dist1['close'] & self.dist2['close'] & self.dist3['far'], (self.speedL['slow'], self.speedR['stop'])),
+            ctrl.Rule(self.dist1['close'] & self.dist2['far'] & self.dist3['far'], (self.speedL['fast'], self.speedR['fast'])),
 
-        # Additional rules for 'ok' and 'stop'
-        rule9 = ctrl.Rule(self.dist1['ok'] & self.dist2['close'] & self.dist3['close'], (self.speedL['slow'], self.speedR['slow']))
-        rule10 = ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['back']))
-        rule11 = ctrl.Rule(self.dist1['ok'] & self.dist2['far'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop']))
-        rule12 = ctrl.Rule(self.dist1['close'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['slow'], self.speedR['stop']))
-        rule13 = ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop']))
-        rule14 = ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['slow'], self.speedR['stop']))
-        rule15 = ctrl.Rule(self.dist1['ok'] & self.dist2['far'] & self.dist3['far'], (self.speedL['fast'], self.speedR['slow']))
-        rule16 = ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['ok'], (self.speedL['slow'], self.speedR['fast']))
-        rule17 = ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['back']))
-        rule18 = ctrl.Rule(self.dist1['ok'] & self.dist2['close'] & self.dist3['far'], (self.speedL['slow'], self.speedR['back']))
-        rule19 = ctrl.Rule(self.dist1['close'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['stop']))
-        rule20 = ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['ok'], (self.speedL['fast'], self.speedR['stop']))
-        rule21 = ctrl.Rule(self.dist1['close'] & self.dist2['close'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop']))
-        rule22 = ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['close'], (self.speedL['slow'], self.speedR['back']))
-        rule23 = ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['far'], (self.speedL['fast'], self.speedR['stop']))
-        rule26 = ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['close'], (self.speedL['stop'], self.speedR['stop']))
-        rule27 = ctrl.Rule(self.dist1['ok'] & self.dist2['close'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop']))
+            ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['far'], (self.speedL['slow'], self.speedR['fast'])),
+            ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['close'], (self.speedL['slow'], self.speedR['back'])),
+            ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['close'], (self.speedL['stop'], self.speedR['stop'])),
+
+            ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop'])),
+            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['close'], (self.speedL['stop'], self.speedR['stop'])),
+            
+
+            # Remove duplicate
+            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['stop'], self.speedR['slow'])),
+            ctrl.Rule(self.dist1['far'] & self.dist2['far'] & self.dist3['ok'], (self.speedL['fast'], self.speedR['stop'])),
+            ctrl.Rule(self.dist1['far'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop'])),
+            ctrl.Rule(self.dist1['far'] & self.dist2['close'] & self.dist3['far'], (self.speedL['stop'], self.speedR['slow'])),
 
 
-        self.steering_ctrl = ctrl.ControlSystem([
-            rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8,
-            rule9, rule10, rule11, rule12, rule13, rule14, rule15, rule16,
-            rule17, rule18, rule19, rule20, rule21, rule22, rule23,
-            rule26, rule27
-        ])
+            # ctrl.Rule(self.dist1['close'] & self.dist2['ok'] & self.dist3['far'], (self.speedL['slow'], self.speedR['back'])),
+            # ctrl.Rule(self.dist1['close'] & self.dist2['far'] & self.dist3['far'], (self.speedL['stop'], self.speedR['stop'])),
+            # ctrl.Rule(self.dist1['ok'] & self.dist2['far'] & self.dist3['far'], (self.speedL['stop'], self.speedR['stop'])),
+
+            # ctrl.Rule(self.dist1['ok'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop'])),
+            # ctrl.Rule(self.dist1['close'] & self.dist2['ok'] & self.dist3['ok'], (self.speedL['stop'], self.speedR['stop'])),
+            # ctrl.Rule(self.dist1['ok'] & self.dist2['close'] & self.dist3['close'], (self.speedL['back'], self.speedR['back'])),
+            
+            
+        ]
+
+        # Initialize the control system with the list of rules
+        self.steering_ctrl = ctrl.ControlSystem(rules)
+
         self.steering = ctrl.ControlSystemSimulation(self.steering_ctrl)
 
     def compute_action(self, d1, d2, d3):

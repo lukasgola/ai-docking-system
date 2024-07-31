@@ -3,6 +3,8 @@ import sys
 import math
 import random
 from Fuzzy import FuzzyLogicController
+from Fuzzy_Parallel import FuzzyParallelLogicController
+from FuzzyRotate import FuzzyRotateLogicController
 
 MAX_SPEED = 5
 
@@ -14,6 +16,9 @@ class AGV:
         self.screen_height = 600
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         pygame.display.set_caption('AGV Simulator')
+
+        self.iteration = 0
+        self.mode = 1
 
         self.font = pygame.font.SysFont(None, 55)
         self.small_font = pygame.font.SysFont(None, 20)
@@ -33,6 +38,8 @@ class AGV:
         self.d2 = 0
         self.d3 = 0
 
+        self.prev_d1 = 0
+
         self.joystick = None
         self.initialize_joystick()
 
@@ -44,23 +51,29 @@ class AGV:
         self.screen_text = ''
 
         self.fuzzy_logic = FuzzyLogicController()
+        self.fuzzy_parallel = FuzzyParallelLogicController()
+        self.fuzzy_rotate = FuzzyRotateLogicController()
 
         self.reset_game()
 
     def reset_spot(self):
         # Parking spot settings
-        self.parking_size = 100
-        self.parking_pos = [40, 60]  # Top-left corner of the parking spot
+        self.parking_size = 120
+        self.parking_pos = [70, 70]  # Top-left corner of the parking spot
         self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
 
     def reset_player(self):
         # Player settings
         r = random.randint(1, 4)
         self.player_size = 40
-        self.player_pos = [ 50 + 50 * r , self.screen_height - 50]
-        self.spawn_points = [(50 + 50 * i, self.screen_height - 50) for i in range(1, 5)]
+        # self.player_pos = [120, self.screen_height - 200]
+        self.player_pos = [ 150 + 50 * r , self.screen_height - 50]
+        self.spawn_points = [(150 + 50 * i, self.screen_height - 50) for i in range(1, 5)]
         self.player_speed = 0
+        self.player_angle = -90
         self.player_angle = random.randint(-15, 15)  # Random angle between -15 and 15
+        self.mode = 0
+
         # self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - self.player_size // 2]
         # self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - self.player_size // 2]
         # self.bottom_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] + self.player_size // 2]
@@ -208,6 +221,12 @@ class AGV:
             self.player_angle += 5
         if keys[pygame.K_r]:
             self.reset_player()
+        if keys[pygame.K_m]:
+            self.mode = 1
+        if keys[pygame.K_p]:
+            self.mode = 3
+        if keys[pygame.K_o]:
+            self.mode = 2
 
     def fuzzy_move(self, player_angle, player_speed):
         self.player_angle += player_angle
@@ -232,8 +251,29 @@ class AGV:
         original_pos = self.player_pos[:]
         original_angle = self.player_angle
 
+        if self.iteration == 15:
+            #print( str(self.iteration) + " : " + str(self.prev_d1) + " : " + str(self.d1))
+            self.prev_d1 = self.d1
+            self.iteration = 0
+        else:
+            self.iteration += 1
+
+    
+
         # Fuzzy logic control
-        speedL, speedR = self.fuzzy_logic.compute_action(self.d1, self.d2, self.d3)
+        if self.mode == 2:
+            print("Rotate")
+            speedL, speedR = self.fuzzy_rotate.compute_action(self.d1, self.d2, self.d3)
+        elif self.mode == 3:
+            print("Parallel")
+            speedL, speedR = self.fuzzy_parallel.compute_action(self.d1 - self.prev_d1, self.d2, self.d3)
+        elif self.mode == 0:
+            speedL = 0
+            speedR = 0
+            self.mode = 1
+        else:
+            print("Logic")
+            speedL, speedR = self.fuzzy_logic.compute_action(self.d1, self.d2, self.d3)
 
         angle_action, speed_action = self.translate(speedL, speedR)
 
@@ -260,9 +300,9 @@ class AGV:
                 self.screen.blit(self.screen_text, (self.screen_width // 2 - self.screen_text.get_width() // 2, self.screen_height // 2 - self.screen_text.get_height() // 2))
                 # Wait for 1000 milliseconds
                 pygame.display.flip()  # Update the display
-                if self.d1 <= 30 and self.d2 <= 30 and self.d3 <= 30:
-                    pygame.time.delay(1000)  # Wait for 1000 ms
-                    self.reset_player()
+                # if self.d1 <= 60 and self.d2 <= 60 and self.d3 <= 60:
+                #     pygame.time.delay(1000)  # Wait for 1000 ms
+                #     self.reset_player()
         else:
             self.screen_text = self.font.render('', True, self.white)
 
