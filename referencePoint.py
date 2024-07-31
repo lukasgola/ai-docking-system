@@ -17,7 +17,7 @@ x_ref = [300]
 y_ref = [300]
 
 # Punkt docelowy
-target_x = 325
+target_x = 300
 target_y = 300
 
 # Oblicz błędy bezwzględne względem punktu docelowego
@@ -37,6 +37,8 @@ std_dev_error_x = np.std(errors_x)
 std_dev_error_y = np.std(errors_y)
 
 # Wyświetl wyniki
+# print(f"Średni błąd względny dla X: {relative_errors_x:.2f}")
+# print(f"Średni błąd względny dla Y: {relative_errors_y:.2f}")
 print(f"Średni błąd bezwzględny dla X: {mean_error_x:.2f}")
 print(f"Średni błąd bezwzględny dla Y: {mean_error_y:.2f}")
 print(f"Odchylenie standardowe błędów dla X: {std_dev_error_x:.2f}")
