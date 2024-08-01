@@ -13,12 +13,12 @@ print(df.columns)
 x_coords = df['Xref']
 y_coords = df['Yref']
 
-x_ref = [300]
-y_ref = [300]
+x_ref = [375]
+y_ref = [325]
 
 # Punkt docelowy
-target_x = 300
-target_y = 300
+target_x = 375
+target_y = 325
 
 # Oblicz błędy bezwzględne względem punktu docelowego
 errors_x = np.abs(x_coords - target_x)
