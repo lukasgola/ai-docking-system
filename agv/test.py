@@ -128,7 +128,7 @@ class MotorSensorController:
         self.client.close()
 
         df = pd.DataFrame(self.rekord, columns=['d1','d2','d3', 'speed_L', 'speed_R'])
-        df.to_excel('4_-30_3.xlsx')
+        df.to_excel('sensors4.xlsx')
 
 if __name__ == "__main__":
     mot_host = "192.168.0.101"
@@ -137,4 +137,4 @@ if __name__ == "__main__":
     sen_port = 4000
 
     controller = MotorSensorController(mot_host, mot_port, sen_host, sen_port)
-    controller.run(160)
+    controller.run(200)
