@@ -5,6 +5,7 @@ import random
 from Fuzzy import FuzzyLogicController
 from Fuzzy_Parallel import FuzzyParallelLogicController
 from FuzzyRotate import FuzzyRotateLogicController
+from Fuzzy_Dock import FuzzyDockLogicController
 
 MAX_SPEED = 5
 
@@ -53,6 +54,7 @@ class AGV:
         self.fuzzy_logic = FuzzyLogicController()
         self.fuzzy_parallel = FuzzyParallelLogicController()
         self.fuzzy_rotate = FuzzyRotateLogicController()
+        self.fuzzy_dock = FuzzyDockLogicController();
 
         self.reset_game()
 
@@ -227,6 +229,8 @@ class AGV:
             self.mode = 3
         if keys[pygame.K_o]:
             self.mode = 2
+        if keys[pygame.K_d]:
+            self.mode = 4
 
     def fuzzy_move(self, player_angle, player_speed):
         self.player_angle += player_angle
@@ -271,9 +275,12 @@ class AGV:
             speedL = 0
             speedR = 0
             self.mode = 1
-        else:
+        elif self.mode == 1:
             print("Logic")
             speedL, speedR = self.fuzzy_logic.compute_action(self.d1, self.d2, self.d3)
+        else:
+            speedL, speedR = self.fuzzy_dock.compute_action(self.d2 - self.d3, self.d2, self.d3)
+
 
         angle_action, speed_action = self.translate(speedL, speedR)
 
