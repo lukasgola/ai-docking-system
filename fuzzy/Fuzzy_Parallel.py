@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 class FuzzyParallelLogicController:
     def __init__(self):
         self.setup_fuzzy_logic()
-        # self.show_plot()
+        self.show_plot()
 
     def setup_fuzzy_logic(self):
         # Define fuzzy variables
@@ -33,12 +33,12 @@ class FuzzyParallelLogicController:
 
         # Membership functions for speed
         self.speedL['back'] = fuzz.trimf(self.speedL.universe, [-50, -20, 0])
-        self.speedL['stop'] = fuzz.trimf(self.speedL.universe, [-5, 0, 5])
+        self.speedL['stop'] = fuzz.trimf(self.speedL.universe, [-10, 0, 10])
         self.speedL['slow'] = fuzz.trimf(self.speedL.universe, [0, 20, 40])
         self.speedL['fast'] = fuzz.trimf(self.speedL.universe, [30, 35, 40])
 
         self.speedR['back'] = fuzz.trimf(self.speedR.universe, [-50, -20, 0])
-        self.speedR['stop'] = fuzz.trimf(self.speedR.universe, [-5, 0, 5])
+        self.speedR['stop'] = fuzz.trimf(self.speedR.universe, [-10, 0, 10])
         self.speedR['slow'] = fuzz.trimf(self.speedR.universe, [0, 20, 40])
         self.speedR['fast'] = fuzz.trimf(self.speedR.universe, [30, 35, 40])
         

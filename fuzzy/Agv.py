@@ -2,9 +2,11 @@ import pygame
 import sys
 import math
 import random
+import pandas as pd
 from Fuzzy import FuzzyLogicController
 from Fuzzy_Parallel import FuzzyParallelLogicController
 from FuzzyRotate import FuzzyRotateLogicController
+from Fuzzy_Dock import FuzzyDockLogicController
 
 MAX_SPEED = 5
 
@@ -33,12 +35,17 @@ class AGV:
         self.horizontal_wall = pygame.Rect(10, 10, self.screen_width, self.wall_thickness)
         self.vertical_wall = pygame.Rect(10, 10, self.wall_thickness, self.screen_height)
 
+        self.rekord = []
+
         # Sensors
         self.d1 = 0
         self.d2 = 0
         self.d3 = 0
 
         self.prev_d1 = 0
+
+        self.distance_history = []
+        self.distance_average = 0
 
         self.joystick = None
         self.initialize_joystick()
@@ -53,6 +60,7 @@ class AGV:
         self.fuzzy_logic = FuzzyLogicController()
         self.fuzzy_parallel = FuzzyParallelLogicController()
         self.fuzzy_rotate = FuzzyRotateLogicController()
+        self.fuzzy_dock = FuzzyDockLogicController();
 
         self.reset_game()
 
@@ -73,6 +81,8 @@ class AGV:
         self.player_angle = -90
         self.player_angle = random.randint(-15, 15)  # Random angle between -15 and 15
         self.mode = 0
+        self.distance_history = []
+        self.distance_average = 0
 
         # self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - self.player_size // 2]
         # self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - self.player_size // 2]
@@ -220,6 +230,8 @@ class AGV:
         if keys[pygame.K_d]:
             self.player_angle += 5
         if keys[pygame.K_r]:
+            df = pd.DataFrame(self.rekord, columns=['speed_L', 'speed_R'])
+            df.to_excel('speeds.xlsx')
             self.reset_player()
         if keys[pygame.K_m]:
             self.mode = 1
@@ -227,6 +239,8 @@ class AGV:
             self.mode = 3
         if keys[pygame.K_o]:
             self.mode = 2
+        if keys[pygame.K_d]:
+            self.mode = 4
 
     def fuzzy_move(self, player_angle, player_speed):
         self.player_angle += player_angle
@@ -239,17 +253,62 @@ class AGV:
         angle = (speedL - speedR) / 10
         speed = (speedL + speedR) / 10
 
-        #print(str(speedL*2) + "  :  " + str(speedR*2))
+        print(str(speedL) + "  :  " + str(speedR))
 
         return angle, speed
+    
+    def caclucate_average(self, lista):
+        # Sprawdzamy, czy lista nie jest pusta
+        if not lista:
+            raise ValueError("Lista nie może być pusta")
+        
+        # Obliczamy sumę elementów i dzielimy przez liczbę elementów
+        suma = sum(lista)
+        liczba_elementow = len(lista)
+        srednia = suma / liczba_elementow
+        
+        return srednia
+    
+    def calculate_average_last_five(self, lista):
+        # Sprawdzamy, czy lista nie jest pusta
+        if not lista:
+            raise ValueError("Lista nie może być pusta")
+
+        # Wybieramy ostatnie 5 elementów
+        ostatnie_elementy = lista[-5:]
+
+        # Obliczamy sumę wybranych elementów i dzielimy przez ich liczbę
+        suma = sum(ostatnie_elementy)
+        liczba_elementow = len(ostatnie_elementy)
+        srednia = suma / liczba_elementow
+
+        return srednia
+
+
 
     def play_step(self):
         self.draw_scene()
 
-        print(str(self.d1) + " : " + str(self.d2) + " : " + str(self.d3))
+        # print(str(self.d1) + " : " + str(self.d2) + " : " + str(self.d3))
 
         original_pos = self.player_pos[:]
         original_angle = self.player_angle
+
+        if self.mode == 3:
+            if len(self.distance_history) >= 20:
+                self.distance_history.pop()
+                self.distance_history.append(self.d1)
+            else:
+                self.distance_history.append(self.d1)
+            
+            if len(self.distance_history) < 5:
+                self.distance_average = self.caclucate_average(self.distance_history)
+                # print(str(self.distance_average) + " : " +  str(self.d1))
+            else:
+                self.distance_average = self.calculate_average_last_five(self.distance_history)
+            
+
+
 
         if self.iteration == 15:
             #print( str(self.iteration) + " : " + str(self.prev_d1) + " : " + str(self.d1))
@@ -262,20 +321,24 @@ class AGV:
 
         # Fuzzy logic control
         if self.mode == 2:
-            print("Rotate")
+            # print("Rotate")
             speedL, speedR = self.fuzzy_rotate.compute_action(self.d1, self.d2, self.d3)
         elif self.mode == 3:
-            print("Parallel")
-            speedL, speedR = self.fuzzy_parallel.compute_action(self.d1 - self.prev_d1, self.d2, self.d3)
+            # print("Parallel")
+            speedL, speedR = self.fuzzy_parallel.compute_action(self.d1 - self.distance_average, self.d2, self.d3)
         elif self.mode == 0:
             speedL = 0
             speedR = 0
             self.mode = 1
-        else:
-            print("Logic")
+        elif self.mode == 1:
+            # print("Logic")
             speedL, speedR = self.fuzzy_logic.compute_action(self.d1, self.d2, self.d3)
+        else:
+            speedL, speedR = self.fuzzy_dock.compute_action(self.d2 - self.d3, self.d2, self.d3)
+
 
         angle_action, speed_action = self.translate(speedL, speedR)
+        self.rekord.append([speedL, speedR])
 
         self.fuzzy_move(angle_action, speed_action)
 
