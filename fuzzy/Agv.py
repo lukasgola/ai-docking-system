@@ -3,6 +3,8 @@ import sys
 import math
 import random
 import pandas as pd
+import numpy as np
+from scipy.optimize import minimize
 from Fuzzy import FuzzyLogicController
 from Fuzzy_Parallel import FuzzyParallelLogicController
 from FuzzyRotate import FuzzyRotateLogicController
@@ -78,8 +80,8 @@ class AGV:
         self.player_pos = [ 150 + 50 * r , self.screen_height - 50]
         self.spawn_points = [(150 + 50 * i, self.screen_height - 50) for i in range(1, 5)]
         self.player_speed = 0
-        self.player_angle = -90
-        self.player_angle = random.randint(-15, 15)  # Random angle between -15 and 15
+        # self.player_angle = 0
+        self.player_angle = random.choice([-30, 0, 30])
         self.mode = 0
         self.distance_history = []
         self.distance_average = 0
@@ -203,6 +205,65 @@ class AGV:
         self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
 
 
+    def find_arc_parameters(self, start_pos, end_pos, start_angle):
+        def objective(params):
+            h, k, R = params
+            return R
+        
+        def constraints(params):
+            h, k, R = params
+            x0, y0 = start_pos
+            xf, yf = end_pos
+            
+            # Punkt startowy
+            c1 = (x0 - h)**2 + (y0 - k)**2 - R**2
+            
+            # Punkt końcowy
+            c2 = (xf - h)**2 + (yf - k)**2 - R**2
+            
+            # Warunek styczności
+            grad_x = x0 - h
+            grad_y = y0 - k
+            grad_mag = np.sqrt(grad_x**2 + grad_y**2)
+            tangent_dot_product = grad_x * np.cos(start_angle) + grad_y * np.sin(start_angle)
+            
+            c3 = np.abs(tangent_dot_product / grad_mag - 1)  # Warunek dla styczności
+
+            return [c1, c2, c3]
+
+        # Początkowe zgadnięcie dla (h, k, R)
+        initial_guess = [0, 0, 10]
+
+        # Optymalizacja
+        result = minimize(objective, initial_guess, constraints={'type': 'eq', 'fun': constraints})
+
+        h, k, R = result.x
+        return h, k, R
+    
+    def draw_arc(self, start_pos, end_pos, start_angle_deg):
+        # Konwersja kąta startowego do radianów
+        start_angle = math.radians(start_angle_deg)
+        
+        # Obliczanie promienia i środka okręgu
+        h, k, R = self.find_arc_parameters(start_pos, end_pos, start_angle)
+        R = abs(R)
+        print(str(R) + " : " + str(h) + " : " + str(k))
+
+        # Obliczanie kąta końcowego
+        # Musisz dostosować obliczanie kąta końcowego do rzeczywistego problemu
+        end_angle = start_angle + np.pi / 2  # Przykład kąta końcowego
+
+        # Sprawdzanie, czy kąt końcowy jest większy od kąta początkowego
+        if end_angle <= start_angle:
+            end_angle += 2 * np.pi  # Dostosowanie kąta końcowego do pełnego obrotu
+
+        
+        # Rysowanie łuku w Pygame
+        rect = pygame.Rect(h - R, k - R, 2 * R, 2 * R)
+        # print(str(rect.width) + " : " + str(rect.height))
+        pygame.draw.arc(self.screen, (255, 255, 255), rect, start_angle, end_angle, 2)
+
+
 
     def analog_move(self):
         if self.analog_keys[0] < -0.3:
@@ -253,7 +314,7 @@ class AGV:
         angle = (speedL - speedR) / 10
         speed = (speedL + speedR) / 10
 
-        print(str(speedL) + "  :  " + str(speedR))
+        # print(str(speedL) + "  :  " + str(speedR))
 
         return angle, speed
     
@@ -340,20 +401,22 @@ class AGV:
         angle_action, speed_action = self.translate(speedL, speedR)
         self.rekord.append([speedL, speedR])
 
-        self.fuzzy_move(angle_action, speed_action)
+        # self.fuzzy_move(angle_action, speed_action)
 
-        self.player_pos[0] += self.player_speed * math.sin(math.radians(self.player_angle))
-        self.player_pos[1] -= self.player_speed * math.cos(math.radians(self.player_angle))
+        # self.player_pos[0] += self.player_speed * math.sin(math.radians(self.player_angle))
+        # self.player_pos[1] -= self.player_speed * math.cos(math.radians(self.player_angle))
 
 
         self.draw_player()
 
         self.draw_sensors(self.top_left, self.top_right, self.bottom_left)
+        
+        self.draw_arc((self.player_pos[0], self.player_pos[1]), (70, 70), self.player_angle)
 
         if self.check_collision(self.player_rect, [self.horizontal_wall, self.vertical_wall]):
             self.player_pos = original_pos
             self.player_angle = original_angle
-            self.screen_text = self.font.render('COLISION', True, self.white)\
+            self.screen_text = self.font.render('COLISION', True, self.white)
             
             self.reset_player()
 
@@ -370,7 +433,7 @@ class AGV:
             self.screen_text = self.font.render('', True, self.white)
 
         self.screen.blit(self.screen_text, (self.screen_width // 2 - self.screen_text.get_width() // 2, self.screen_height // 2 - self.screen_text.get_height() // 2))
-
+        
         pygame.display.flip()
 
     def run(self):
