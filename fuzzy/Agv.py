@@ -259,7 +259,7 @@ class AGV:
 
         
         # Rysowanie łuku w Pygame
-        rect = pygame.Rect(h - R, k - R, 2 * R, 2 * R)
+        rect = pygame.Rect(0, 0, self.screen_width, self.screen_height)
         # print(str(rect.width) + " : " + str(rect.height))
         pygame.draw.arc(self.screen, (255, 255, 255), rect, start_angle, end_angle, 2)
 
