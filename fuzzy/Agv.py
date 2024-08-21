@@ -208,37 +208,76 @@ class AGV:
     def find_arc_parameters(self, start_pos, end_pos, start_angle):
         def objective(params):
             h, k, R = params
-            return R
-        
+            return R  # Chcemy minimalizować promień
+
         def constraints(params):
             h, k, R = params
             x0, y0 = start_pos
             xf, yf = end_pos
-            
-            # Punkt startowy
+
+            # Punkt startowy musi należeć do okręgu
             c1 = (x0 - h)**2 + (y0 - k)**2 - R**2
             
-            # Punkt końcowy
+            # Punkt końcowy musi należeć do okręgu
             c2 = (xf - h)**2 + (yf - k)**2 - R**2
             
-            # Warunek styczności
-            grad_x = x0 - h
-            grad_y = y0 - k
-            grad_mag = np.sqrt(grad_x**2 + grad_y**2)
-            tangent_dot_product = grad_x * np.cos(start_angle) + grad_y * np.sin(start_angle)
-            
-            c3 = np.abs(tangent_dot_product / grad_mag - 1)  # Warunek dla styczności
+            # Warunek styczności w punkcie startowym
+            normal_x = x0 - h
+            normal_y = y0 - k
+            tangent_x = -np.sin(start_angle)
+            tangent_y = np.cos(start_angle)
+
+            # Sprawdzamy czy wektor normalny i wektor kierunku są prostopadłe
+            c3 = normal_x * tangent_x + normal_y * tangent_y
 
             return [c1, c2, c3]
 
         # Początkowe zgadnięcie dla (h, k, R)
         initial_guess = [0, 0, 10]
 
+        # Ograniczenie, aby promień był dodatni
+        bounds = [(None, None), (None, None), (1e-3, 10000)]
+
         # Optymalizacja
-        result = minimize(objective, initial_guess, constraints={'type': 'eq', 'fun': constraints})
+        result = minimize(objective, initial_guess, constraints={'type': 'eq', 'fun': constraints}, bounds=bounds)
 
         h, k, R = result.x
+
+        # Upewnij się, że promień jest dodatni
+        if R <= 0:
+            R = 0.1  # Ustaw minimalny dodatni promień, jeśli promień jest niepoprawny
+
         return h, k, R
+
+    
+    def calculate_arc_length(self, start_pos, end_pos, center_pos, R):
+        # Punkt startowy i końcowy
+        x0, y0 = start_pos
+        xf, yf = end_pos
+        h, k = center_pos
+
+        # Wektory do punktów startowego i końcowego
+        vector_start = np.array([x0 - h, y0 - k])
+        vector_end = np.array([xf - h, yf - k])
+
+        # Obliczanie kąta między wektorami
+        dot_product = np.dot(vector_start, vector_end)
+        norm_start = np.linalg.norm(vector_start)
+        norm_end = np.linalg.norm(vector_end)
+
+        # Użycie wzoru kosinusa do obliczenia kąta
+        cos_theta = dot_product / (norm_start * norm_end)
+
+        # Upewnij się, że cos_theta jest w zakresie [-1, 1]
+        cos_theta = np.clip(cos_theta, -1.0, 1.0)
+
+        theta = np.arccos(cos_theta)  # Kąt środkowy w radianach
+
+        # Obliczanie długości łuku
+        arc_length = R * theta
+        return arc_length
+
+
     
     def draw_arc(self, start_pos, end_pos, start_angle_deg):
         # Konwersja kąta startowego do radianów
@@ -246,23 +285,31 @@ class AGV:
         
         # Obliczanie promienia i środka okręgu
         h, k, R = self.find_arc_parameters(start_pos, end_pos, start_angle)
-        R = abs(R)
-        print(str(R) + " : " + str(h) + " : " + str(k))
+        print(f"Promień: {R}, Środek: ({h}, {k})")
 
-        # Obliczanie kąta końcowego
-        # Musisz dostosować obliczanie kąta końcowego do rzeczywistego problemu
-        end_angle = start_angle + np.pi / 2  # Przykład kąta końcowego
+        # Obliczenie kąta początkowego w radianach (od kierunku pojazdu)
+        start_angle_rad = start_angle  # zakładamy, że start_angle jest podany w radianach
 
-        # Sprawdzanie, czy kąt końcowy jest większy od kąta początkowego
-        if end_angle <= start_angle:
-            end_angle += 2 * np.pi  # Dostosowanie kąta końcowego do pełnego obrotu
+        # Obliczenie kąta końcowego w radianach na podstawie punktu końcowego
+        end_angle_rad = np.arctan2(end_pos[1] - k, end_pos[0] - h)
 
+        # Sprawdzanie, czy kąt końcowy jest mniejszy od kąta początkowego
+        if end_angle_rad <= start_angle_rad:
+            end_angle_rad += 2 * np.pi  # Dostosowanie kąta końcowego do pełnego obrotu
         
-        # Rysowanie łuku w Pygame
-        rect = pygame.Rect(h - R, k - R, 2 * R, 2 * R)
-        # print(str(rect.width) + " : " + str(rect.height))
-        pygame.draw.arc(self.screen, (255, 255, 255), rect, start_angle, end_angle, 2)
+        # Obliczanie długości łuku
+        arc_length = self.calculate_arc_length(start_pos, end_pos, (h, k), R)
+        print(f"Długość łuku: {arc_length}")
 
+
+        # Rysowanie okręgu i łuku w Pygame
+        rect = pygame.Rect(h - R, k - R, 2 * R, 2 * R)
+        pygame.draw.circle(self.screen, (255, 255, 255), (int(h), int(k)), int(R), 2)
+        # pygame.draw.rect(self.screen, (255, 0, 0), rect, 1)
+
+        # Rysowanie łuku - dla pygame używamy wartości od 0 do 1 w normalizowanych współrzędnych kąta
+        # pygame.draw.arc(self.screen, (255, 255, 255), rect, start_angle_rad, end_angle_rad, 2)
+        return arc_length
 
 
     def analog_move(self):
@@ -410,8 +457,22 @@ class AGV:
         self.draw_player()
 
         self.draw_sensors(self.top_left, self.top_right, self.bottom_left)
+
         
-        self.draw_arc((self.player_pos[0], self.player_pos[1]), (70, 70), self.player_angle)
+        left_wheel = self.top_left
+        right_wheel = self.top_right
+        
+        left_length = self.draw_arc((left_wheel[0], left_wheel[1]), (70, 70), self.player_angle)
+        right_length = self.draw_arc((right_wheel[0], right_wheel[1]), (70, 70), self.player_angle)
+
+        # Renderowanie długości łuku jako tekst
+        text_surface = self.small_font.render(f"Left: {left_length:.2f}", True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=(self.screen_width - 100, self.screen_height - 300))  # Pozycja nad kołem
+        self.screen.blit(text_surface, text_rect)
+
+        text_surface = self.small_font.render(f"Right: {right_length:.2f}", True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=(self.screen_width - 100, self.screen_height - 250))  # Pozycja nad kołem
+        self.screen.blit(text_surface, text_rect)
 
         if self.check_collision(self.player_rect, [self.horizontal_wall, self.vertical_wall]):
             self.player_pos = original_pos
