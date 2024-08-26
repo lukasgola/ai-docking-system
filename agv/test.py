@@ -34,26 +34,29 @@ class MotorSensorController:
         right_f = 0xFF
         right_b = 0xFF
 
-        if self.speed_L >= 0:
-            left_f = 255 - (self.speed_L + 80)
-        else:
-            left_b = 255 - (abs(self.speed_L) + 80)
+        # if self.speed_L >= 0:
+        #     left_f = 255 - (self.speed_L + 80)
+        # else:
+        #     left_b = 255 - (abs(self.speed_L) + 80)
 
-        if self.speed_R >= 0:
-            right_f = 255 - (self.speed_R + 80)
-        else:
-            right_b = 255 - (abs(self.speed_R) + 80)
+        # if self.speed_R >= 0:
+        #     right_f = 255 - (self.speed_R + 80)
+        # else:
+        #     right_b = 255 - (abs(self.speed_R) + 80)
 
-        # print(f"{left_b}, {left_f}, {right_b}, {right_f}")
+        # # print(f"{left_b}, {left_f}, {right_b}, {right_f}")
 
-        if left_b > 170:
-            left_b = 255
-        if left_f > 170:
-            left_f = 255
-        if right_b > 170:
-            right_b = 255
-        if right_f > 170:
-            right_f = 255
+        # if left_b > 170:
+        #     left_b = 255
+        # if left_f > 170:
+        #     left_f = 255
+        # if right_b > 170:
+        #     right_b = 255
+        # if right_f > 170:
+        #     right_f = 255
+
+        left_f = 255 - self.speed_L
+        right_f = 255 - self.speed_R
 
 
         message = bytes([int(left_b), int(left_f), int(right_b), int(right_f)])
@@ -112,8 +115,8 @@ class MotorSensorController:
                 speedL, speedR = self.fuzzy_parallel.compute_action(d1 - self.prev_d1, d2, d3)
             
             
-            self.speed_L = speedL
-            self.speed_R = speedR
+            self.speed_L = 100
+            self.speed_R = 115
 
     def run(self, iterations):
         for i in range(iterations):
@@ -128,7 +131,7 @@ class MotorSensorController:
         self.client.close()
 
         df = pd.DataFrame(self.rekord, columns=['d1','d2','d3', 'speed_L', 'speed_R'])
-        df.to_excel('sensors4.xlsx')
+        # df.to_excel('dead_test.xlsx')
 
 if __name__ == "__main__":
     mot_host = "192.168.0.101"

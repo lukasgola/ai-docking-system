@@ -96,16 +96,16 @@ class AGV:
         # self.player_pos = [ 150 + 50 * r , self.screen_height - 50]
         # self.player_pos_r = [ 150 + 50 * r , self.screen_height - 50]
         # self.start_pos = [ 150 + 50 * r , self.screen_height - 50]
-        self.player_pos = [600, 2450]
-        self.player_pos_r = [600, 2450]
-        self.start_pos = [600, 2450]
+        self.player_pos = [1800, 2450]
+        self.player_pos_r = [1800, 2450]
+        self.start_pos = [1800, 2450]
         self.spawn_points = [(150 + 50 * i, self.screen_height - 50) for i in range(1, 5)]
         self.player_speed = 0
         # self.player_angle = 0
         # self.player_angle = random.choice([-30, 0, 30])
         # self.player_angle_r = self.player_angle
-        self.player_angle = -30
-        self.player_angle_r = -30
+        self.player_angle = 0
+        self.player_angle_r = 0
         self.angle = self.player_angle
         self.mode = 0
         self.distance_history = []
@@ -468,6 +468,7 @@ class AGV:
         return math.atan2(y - y0, x - x0)
 
     def wspolrzedne_punktow(self, srodek, r1, r2, r3, punkt_na_centralnym_okregu):
+
         # Oblicz kąt theta z punktu na centralnym okręgu
         theta = self.kat_z_punktu(srodek, punkt_na_centralnym_okregu)
         
@@ -480,6 +481,22 @@ class AGV:
         
         return P1, P2, P3
 
+    def normalizuj_predkosci(self, v_1, v_2, norm_min=115):
+        v_min = min(v_1, v_2)
+        v_max = max(v_1, v_2)
+        
+        # Znormalizowana prędkość dla mniejszej wartości
+        v_min_norm = norm_min
+        
+        # Znormalizowana prędkość dla większej wartości, proporcjonalnie
+        v_max_norm = norm_min * (v_max / v_min)
+        
+        # Przypisanie znormalizowanych wartości do odpowiednich zmiennych
+        if v_1 == v_min:
+            return v_min_norm, v_max_norm
+        else:
+            return v_max_norm, v_min_norm
+        
 
     def play_step(self):
         self.draw_scene()
@@ -577,7 +594,7 @@ class AGV:
         # action_speed = (self.speedL + self.speedR)
         # action_angle = (self.speedL - self.speedR)
 
-        angle_speed = -0.005
+        angle_speed = -0.1
         self.angle += angle_speed
         self.player_angle = math.degrees(self.angle)
         self.player_angle_r = math.degrees(self.angle)
@@ -585,15 +602,19 @@ class AGV:
         self.speedL = angle_speed * self.radius_l
         self.speedR = angle_speed * self.radius_r
 
+
         print(str(self.speedL) + " : " + str(self.speedR))
+        norm_right_speed, norm_left_speed = self.normalizuj_predkosci(self.speedL, self.speedR)
+
+        print(str(norm_right_speed) + " : " + str(norm_left_speed))
         print(str(self.dlugosc_luku(s_P1, k_P1, Rl)) + " : " + str(self.dlugosc_luku(s_P2, k_P2, Rc)) + " : " + str(self.dlugosc_luku(s_P3, k_P3, Rr)))
         print(str(self.kat_przeciecia((x,y), self.parking_pos)))
         # self.player_angle += action_angle
         # self.player_speed = action_speed
 
         # Aktualizacja pozycji prostokąta na podstawie kąta i promienia
-        self.player_pos[0] = self.circle_center[0] + Rc * math.cos(self.angle)
-        self.player_pos[1] = self.circle_center[1] + Rc * math.sin(self.angle)
+        self.player_pos[0] = self.circle_center[0] + self.radius_l * math.cos(self.angle)
+        self.player_pos[1] = self.circle_center[1] + self.radius_l * math.sin(self.angle)
 
         self.player_pos_r[0] = self.circle_center[0] + self.radius_r * math.cos(self.angle)
         self.player_pos_r[1] = self.circle_center[1] + self.radius_r * math.sin(self.angle)
