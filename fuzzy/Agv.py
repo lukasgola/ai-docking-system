@@ -79,12 +79,13 @@ class AGV:
         self.fuzzy_rotate = FuzzyRotateLogicController()
         self.fuzzy_dock = FuzzyDockLogicController();
 
+
         self.reset_game()
 
     def reset_spot(self):
         # Parking spot settings
         self.parking_size = 120
-        self.parking_pos = [70, 70]  # Top-left corner of the parking spot
+        self.parking_pos = [350, 350]  # Top-left corner of the parking spot
         self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
 
     def reset_player(self):
@@ -92,14 +93,19 @@ class AGV:
         r = random.randint(1, 4)
         self.player_size = 20
         # self.player_pos = [120, self.screen_height - 200]
-        self.player_pos = [ 150 + 50 * r , self.screen_height - 50]
-        self.player_pos_r = [ 150 + 50 * r , self.screen_height - 50]
-        self.start_pos = [ 150 + 50 * r , self.screen_height - 50]
+        # self.player_pos = [ 150 + 50 * r , self.screen_height - 50]
+        # self.player_pos_r = [ 150 + 50 * r , self.screen_height - 50]
+        # self.start_pos = [ 150 + 50 * r , self.screen_height - 50]
+        self.player_pos = [600, 2450]
+        self.player_pos_r = [600, 2450]
+        self.start_pos = [600, 2450]
         self.spawn_points = [(150 + 50 * i, self.screen_height - 50) for i in range(1, 5)]
         self.player_speed = 0
         # self.player_angle = 0
-        self.player_angle = random.choice([-30, 0, 30])
-        self.player_angle_r = self.player_angle
+        # self.player_angle = random.choice([-30, 0, 30])
+        # self.player_angle_r = self.player_angle
+        self.player_angle = -30
+        self.player_angle_r = -30
         self.angle = self.player_angle
         self.mode = 0
         self.distance_history = []
@@ -439,6 +445,42 @@ class AGV:
 
 
 
+    def odleglosc(self, p1, p2):
+        return math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
+
+    def kat_centralny(self, p1, p2, r):
+        d = self.odleglosc(p1, p2)
+        return 2 * math.asin(d / (2 * r))
+
+    def dlugosc_luku(self, p1, p2, r):
+        theta = self.kat_centralny(p1, p2, r)
+        return r * theta
+
+    def kat_przeciecia(self, srodek, punkt):
+        x0, y0 = srodek
+        x, y = punkt
+        theta = math.atan2(y - y0, x - x0)
+        return math.degrees(theta)
+    
+    def kat_z_punktu(self, srodek, punkt):
+        x0, y0 = srodek
+        x, y = punkt
+        return math.atan2(y - y0, x - x0)
+
+    def wspolrzedne_punktow(self, srodek, r1, r2, r3, punkt_na_centralnym_okregu):
+        # Oblicz kąt theta z punktu na centralnym okręgu
+        theta = self.kat_z_punktu(srodek, punkt_na_centralnym_okregu)
+        
+        x0, y0 = srodek
+        
+        # Współrzędne punktów dla każdego z promieni
+        P1 = (x0 + r1 * math.cos(theta), y0 + r1 * math.sin(theta))
+        P2 = (x0 + r2 * math.cos(theta), y0 + r2 * math.sin(theta))
+        P3 = (x0 + r3 * math.cos(theta), y0 + r3 * math.sin(theta))
+        
+        return P1, P2, P3
+
+
     def play_step(self):
         self.draw_scene()
 
@@ -496,10 +538,23 @@ class AGV:
         #     self.right_wheel = self.top_right
         #     self.start_angle = self.player_angle
         
-        [center_length, x, y, Rc] = self.draw_arc((self.start_pos[0], self.start_pos[1]), (70, 70), self.start_angle)
+        [center_length, x, y, Rc] = self.draw_arc((self.start_pos[0], self.start_pos[1]), self.parking_pos, self.start_angle)
 
-        [left_length, Rl] = self.draw_wheel_arc((self.left_wheel[0], self.left_wheel[1]), (70, 70), (x,y), Rc - 40)
-        [right_length, Rr] = self.draw_wheel_arc((self.right_wheel[0], self.right_wheel[1]), (70, 70), (x, y), Rc + 40)
+        [left_length, Rl] = self.draw_wheel_arc((self.left_wheel[0], self.left_wheel[1]), self.parking_pos, (x,y), Rc - 150)
+        [right_length, Rr] = self.draw_wheel_arc((self.right_wheel[0], self.right_wheel[1]), self.parking_pos, (x, y), Rc + 150)
+
+
+        print("Pozycja startowa: " + str(self.start_pos[0]) + ' : ' + str(self.start_pos[1]))
+
+        s_P1, s_P2, s_P3 = self.wspolrzedne_punktow((x,y), Rl, Rc, Rr, self.start_pos)
+        print(f"Punkt startowy na okręgu o promieniu {Rl}: {s_P1}")
+        print(f"Punkt startowy na okręgu o promieniu {Rc}: {s_P2}")
+        print(f"Punkt startowy na okręgu o promieniu {Rr}: {s_P3}")
+
+        k_P1, k_P2, k_P3 = self.wspolrzedne_punktow((x,y), Rl, Rc, Rr, self.parking_pos)
+        print(f"Punkt koncowy na okręgu o promieniu {Rl}: {k_P1}")
+        print(f"Punkt koncowy na okręgu o promieniu {Rc}: {k_P2}")
+        print(f"Punkt koncowy na okręgu o promieniu {Rr}: {k_P3}")
         
 
         if(self.speedL == 0 and self.speedR == 0):
@@ -531,12 +586,14 @@ class AGV:
         self.speedR = angle_speed * self.radius_r
 
         print(str(self.speedL) + " : " + str(self.speedR))
+        print(str(self.dlugosc_luku(s_P1, k_P1, Rl)) + " : " + str(self.dlugosc_luku(s_P2, k_P2, Rc)) + " : " + str(self.dlugosc_luku(s_P3, k_P3, Rr)))
+        print(str(self.kat_przeciecia((x,y), self.parking_pos)))
         # self.player_angle += action_angle
         # self.player_speed = action_speed
 
         # Aktualizacja pozycji prostokąta na podstawie kąta i promienia
-        self.player_pos[0] = self.circle_center[0] + self.radius_l * math.cos(self.angle)
-        self.player_pos[1] = self.circle_center[1] + self.radius_l * math.sin(self.angle)
+        self.player_pos[0] = self.circle_center[0] + Rc * math.cos(self.angle)
+        self.player_pos[1] = self.circle_center[1] + Rc * math.sin(self.angle)
 
         self.player_pos_r[0] = self.circle_center[0] + self.radius_r * math.cos(self.angle)
         self.player_pos_r[1] = self.circle_center[1] + self.radius_r * math.sin(self.angle)
