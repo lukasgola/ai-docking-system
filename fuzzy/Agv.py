@@ -80,6 +80,9 @@ class AGV:
         self.fuzzy_dock = FuzzyDockLogicController();
 
 
+        self.agv_speed = 250 # 250 mmm / s
+
+
         self.reset_game()
 
     def reset_spot(self):
@@ -96,16 +99,16 @@ class AGV:
         # self.player_pos = [ 150 + 50 * r , self.screen_height - 50]
         # self.player_pos_r = [ 150 + 50 * r , self.screen_height - 50]
         # self.start_pos = [ 150 + 50 * r , self.screen_height - 50]
-        self.player_pos = [1800, 2450]
-        self.player_pos_r = [1800, 2450]
-        self.start_pos = [1800, 2450]
+        self.player_pos = [900, 2450] #TUTAJ
+        self.player_pos_r = [900, 2450] #TUTAJ
+        self.start_pos = [900, 2450] #TUTAJ
         self.spawn_points = [(150 + 50 * i, self.screen_height - 50) for i in range(1, 5)]
         self.player_speed = 0
         # self.player_angle = 0
         # self.player_angle = random.choice([-30, 0, 30])
         # self.player_angle_r = self.player_angle
-        self.player_angle = 0
-        self.player_angle_r = 0
+        self.player_angle = 30
+        self.player_angle_r = 30
         self.angle = self.player_angle
         self.mode = 0
         self.distance_history = []
@@ -564,20 +567,20 @@ class AGV:
         print("Pozycja startowa: " + str(self.start_pos[0]) + ' : ' + str(self.start_pos[1]))
 
         s_P1, s_P2, s_P3 = self.wspolrzedne_punktow((x,y), Rl, Rc, Rr, self.start_pos)
-        print(f"Punkt startowy na okręgu o promieniu {Rl}: {s_P1}")
-        print(f"Punkt startowy na okręgu o promieniu {Rc}: {s_P2}")
-        print(f"Punkt startowy na okręgu o promieniu {Rr}: {s_P3}")
+        # print(f"Punkt startowy na okręgu o promieniu {Rl}: {s_P1}")
+        # print(f"Punkt startowy na okręgu o promieniu {Rc}: {s_P2}")
+        # print(f"Punkt startowy na okręgu o promieniu {Rr}: {s_P3}")
 
         k_P1, k_P2, k_P3 = self.wspolrzedne_punktow((x,y), Rl, Rc, Rr, self.parking_pos)
-        print(f"Punkt koncowy na okręgu o promieniu {Rl}: {k_P1}")
-        print(f"Punkt koncowy na okręgu o promieniu {Rc}: {k_P2}")
-        print(f"Punkt koncowy na okręgu o promieniu {Rr}: {k_P3}")
+        # print(f"Punkt koncowy na okręgu o promieniu {Rl}: {k_P1}")
+        # print(f"Punkt koncowy na okręgu o promieniu {Rc}: {k_P2}")
+        # print(f"Punkt koncowy na okręgu o promieniu {Rr}: {k_P3}")
         
 
         if(self.speedL == 0 and self.speedR == 0):
 
             # Obliczanie prędkości kół na podstawie promieni
-            print("new circle")
+            # print("new circle")
 
             speed_L = Rl / 500
             speed_R = Rr / 500
@@ -603,12 +606,14 @@ class AGV:
         self.speedR = angle_speed * self.radius_r
 
 
-        print(str(self.speedL) + " : " + str(self.speedR))
+        # print(str(self.speedL) + " : " + str(self.speedR))
         norm_right_speed, norm_left_speed = self.normalizuj_predkosci(self.speedL, self.speedR)
 
         print(str(norm_right_speed) + " : " + str(norm_left_speed))
         print(str(self.dlugosc_luku(s_P1, k_P1, Rl)) + " : " + str(self.dlugosc_luku(s_P2, k_P2, Rc)) + " : " + str(self.dlugosc_luku(s_P3, k_P3, Rr)))
-        print(str(self.kat_przeciecia((x,y), self.parking_pos)))
+        longest_arc = max(self.dlugosc_luku(s_P1, k_P1, Rl), self.dlugosc_luku(s_P2, k_P2, Rc), self.dlugosc_luku(s_P3, k_P3, Rr))
+        print("Czas dziłania: " + str(longest_arc / self.agv_speed) )
+        # print(str(self.kat_przeciecia((x,y), self.parking_pos)))
         # self.player_angle += action_angle
         # self.player_speed = action_speed
 
