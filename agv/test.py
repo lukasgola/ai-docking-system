@@ -136,14 +136,14 @@ class MotorSensorController:
             if elapsed_time > self.working_time:
                 break
  
-            # print(f"Updated speeds: speedL={self.speed_L}, speedR={self.speed_R}")
-            # self.send_motor_command()
-            # self.receive_motor_response()
-            # self.send_sensor_command()
-            # d1, d2, d3 = self.receive_sensor_response()
-            d1 = 0
-            d2 = 0
-            d3 = 0
+            print(f"Updated speeds: speedL={self.speed_L}, speedR={self.speed_R}")
+            self.send_motor_command()
+            self.receive_motor_response()
+            self.send_sensor_command()
+            d1, d2, d3 = self.receive_sensor_response()
+            # d1 = 0
+            # d2 = 0
+            # d3 = 0
 
             self.update_speeds(d1, d2, d3)
             time.sleep(0.01)
