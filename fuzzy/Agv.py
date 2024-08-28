@@ -99,16 +99,18 @@ class AGV:
         # self.player_pos = [ 150 + 50 * r , self.screen_height - 50]
         # self.player_pos_r = [ 150 + 50 * r , self.screen_height - 50]
         # self.start_pos = [ 150 + 50 * r , self.screen_height - 50]
-        self.player_pos = [900, 2450] #TUTAJ
-        self.player_pos_r = [900, 2450] #TUTAJ
-        self.start_pos = [900, 2450] #TUTAJ
+        x = 600
+        ang = 0
+        self.player_pos = [x, 2450] #TUTAJ
+        self.player_pos_r = [x, 2450] #TUTAJ
+        self.start_pos = [x, 2450] #TUTAJ
         self.spawn_points = [(150 + 50 * i, self.screen_height - 50) for i in range(1, 5)]
         self.player_speed = 0
         # self.player_angle = 0
         # self.player_angle = random.choice([-30, 0, 30])
         # self.player_angle_r = self.player_angle
-        self.player_angle = 30
-        self.player_angle_r = 30
+        self.player_angle = ang
+        self.player_angle_r = ang
         self.angle = self.player_angle
         self.mode = 0
         self.distance_history = []
@@ -612,8 +614,8 @@ class AGV:
         print(str(norm_right_speed) + " : " + str(norm_left_speed))
         print(str(self.dlugosc_luku(s_P1, k_P1, Rl)) + " : " + str(self.dlugosc_luku(s_P2, k_P2, Rc)) + " : " + str(self.dlugosc_luku(s_P3, k_P3, Rr)))
         longest_arc = max(self.dlugosc_luku(s_P1, k_P1, Rl), self.dlugosc_luku(s_P2, k_P2, Rc), self.dlugosc_luku(s_P3, k_P3, Rr))
-        print("Czas dziłania: " + str(longest_arc / self.agv_speed) )
-        # print(str(self.kat_przeciecia((x,y), self.parking_pos)))
+        # print("Czas dziłania: " + str(longest_arc / self.agv_speed) )
+        print(str(self.kat_przeciecia((x,y), self.parking_pos)))
         # self.player_angle += action_angle
         # self.player_speed = action_speed
 
