@@ -99,8 +99,8 @@ class AGV:
         # self.player_pos = [ 150 + 50 * r , self.screen_height - 50]
         # self.player_pos_r = [ 150 + 50 * r , self.screen_height - 50]
         # self.start_pos = [ 150 + 50 * r , self.screen_height - 50]
-        x = 600
-        ang = 0
+        x = 900
+        ang = -30
         self.player_pos = [x, 2450] #TUTAJ
         self.player_pos_r = [x, 2450] #TUTAJ
         self.start_pos = [x, 2450] #TUTAJ
