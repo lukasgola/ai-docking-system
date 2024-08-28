@@ -46,6 +46,21 @@ class AGV:
 
         self.prev_d1 = 0
 
+        self.speedL = 0
+        self.speedR = 0
+
+        self.circle_center = [0,0]
+        self.radius_l = 0
+        self.radius_r = 0
+        self.angle = 0
+        self.angle_r = 0
+
+        self.left_wheel = 0
+        self.right_wheel = 0
+
+        self.start_pos = [0,0]
+        self.start_angle = 0
+
         self.distance_history = []
         self.distance_average = 0
 
@@ -64,32 +79,62 @@ class AGV:
         self.fuzzy_rotate = FuzzyRotateLogicController()
         self.fuzzy_dock = FuzzyDockLogicController();
 
+
+        self.agv_speed = 250 # 250 mmm / s
+
+
         self.reset_game()
 
     def reset_spot(self):
         # Parking spot settings
         self.parking_size = 120
-        self.parking_pos = [70, 70]  # Top-left corner of the parking spot
+        self.parking_pos = [350, 350]  # Top-left corner of the parking spot
         self.parking_rect = pygame.Rect(self.parking_pos[0], self.parking_pos[1], self.parking_size , self.parking_size)
 
     def reset_player(self):
         # Player settings
         r = random.randint(1, 4)
-        self.player_size = 40
+        self.player_size = 20
         # self.player_pos = [120, self.screen_height - 200]
-        self.player_pos = [ 150 + 50 * r , self.screen_height - 50]
+        # self.player_pos = [ 150 + 50 * r , self.screen_height - 50]
+        # self.player_pos_r = [ 150 + 50 * r , self.screen_height - 50]
+        # self.start_pos = [ 150 + 50 * r , self.screen_height - 50]
+        self.player_pos = [900, 2450] #TUTAJ
+        self.player_pos_r = [900, 2450] #TUTAJ
+        self.start_pos = [900, 2450] #TUTAJ
         self.spawn_points = [(150 + 50 * i, self.screen_height - 50) for i in range(1, 5)]
         self.player_speed = 0
         # self.player_angle = 0
-        self.player_angle = random.choice([-30, 0, 30])
+        # self.player_angle = random.choice([-30, 0, 30])
+        # self.player_angle_r = self.player_angle
+        self.player_angle = 30
+        self.player_angle_r = 30
+        self.angle = self.player_angle
         self.mode = 0
         self.distance_history = []
         self.distance_average = 0
+        self.speedL = 0
+        self.speedR = 0
 
-        # self.top_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] - self.player_size // 2]
-        # self.top_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] - self.player_size // 2]
-        # self.bottom_left = [self.player_pos[0] - self.player_size // 2, self.player_pos[1] + self.player_size // 2]
-        # self.bottom_right = [self.player_pos[0] + self.player_size // 2, self.player_pos[1] + self.player_size // 2]
+        self.top_left = [self.player_pos[0] - self.player_size, self.player_pos[1] - self.player_size]
+        self.top_right = [self.player_pos[0] + self.player_size, self.player_pos[1] - self.player_size]
+        self.bottom_left = [self.player_pos[0] - self.player_size, self.player_pos[1] + self.player_size]
+        self.bottom_right = [self.player_pos[0] + self.player_size, self.player_pos[1] + self.player_size]
+
+        self.top_left_r = [self.player_pos_r[0] - self.player_size, self.player_pos_r[1] - self.player_size]
+        self.top_right_r = [self.player_pos_r[0] + self.player_size, self.player_pos_r[1] - self.player_size]
+        self.bottom_left_r = [self.player_pos_r[0] - self.player_size, self.player_pos_r[1] + self.player_size]
+        self.bottom_right_r = [self.player_pos_r[0] + self.player_size, self.player_pos_r[1] + self.player_size]
+
+        self.player_rect = self.draw_player(self.player_pos, self.player_angle, self.top_left, self.top_right, self.bottom_left, self.bottom_right )
+        self.player_rect_r = self.draw_player(self.player_pos_r, self.player_angle_r, self.top_left_r, self.top_right_r, self.bottom_left_r, self.bottom_right_r )
+
+        self.left_wheel = self.top_left
+        self.right_wheel = self.top_right
+        self.start_angle = self.player_angle
+        # self.radius = 0
+        # self.circle_center = [0,0]
+
         # self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
 
 
@@ -189,20 +234,28 @@ class AGV:
             pygame.draw.rect(self.screen, (255, 255, 255), (spawn_point[0], spawn_point[1], 5, 5))
 
         
-    def draw_player(self):
-        self.top_left = [self.player_pos[0] - self.player_size, self.player_pos[1] - 2 * self.player_size // 2]
-        self.top_right = [self.player_pos[0] + self.player_size, self.player_pos[1] - 2 * self.player_size // 2]
-        self.bottom_left = [self.player_pos[0] - self.player_size, self.player_pos[1] + self.player_size // 2]
-        self.bottom_right = [self.player_pos[0] + self.player_size, self.player_pos[1] + self.player_size // 2]
+    def draw_player(self, player_pos, player_angle, top_left, top_right, bottom_left, bottom_right):
+        # Obliczanie punktów na podstawie podanej pozycji i rozmiaru
+        top_left = [player_pos[0] - self.player_size, player_pos[1] - 2 * self.player_size // 2]
+        top_right = [player_pos[0] + self.player_size, player_pos[1] - 2 * self.player_size // 2]
+        bottom_left = [player_pos[0] - self.player_size, player_pos[1] + self.player_size // 2]
+        bottom_right = [player_pos[0] + self.player_size, player_pos[1] + self.player_size // 2]
 
-        origin = self.player_pos
-        self.top_left = self.rotate_point(self.top_left, self.player_angle, origin)
-        self.top_right = self.rotate_point(self.top_right, self.player_angle, origin)
-        self.bottom_left = self.rotate_point(self.bottom_left, self.player_angle, origin)
-        self.bottom_right = self.rotate_point(self.bottom_right, self.player_angle, origin)
+        origin_r = player_pos
 
-        # Draw player
-        self.player_rect = pygame.draw.polygon(self.screen, self.red, [self.top_left, self.top_right, self.bottom_right, self.bottom_left])
+        # Rotacja punktów
+        top_left = self.rotate_point(top_left, player_angle, origin_r)
+        top_right = self.rotate_point(top_right, player_angle, origin_r)
+        bottom_left = self.rotate_point(bottom_left, player_angle, origin_r)
+        bottom_right = self.rotate_point(bottom_right, player_angle, origin_r)
+
+        # Rysowanie prostokąta
+        player_rect = pygame.draw.polygon(self.screen, self.red, [top_left, top_right, bottom_right, bottom_left])
+        
+        return player_rect
+
+
+
 
 
     def find_arc_parameters(self, start_pos, end_pos, start_angle):
@@ -277,7 +330,6 @@ class AGV:
         arc_length = R * theta
         return arc_length
 
-
     
     def draw_arc(self, start_pos, end_pos, start_angle_deg):
         # Konwersja kąta startowego do radianów
@@ -285,7 +337,6 @@ class AGV:
         
         # Obliczanie promienia i środka okręgu
         h, k, R = self.find_arc_parameters(start_pos, end_pos, start_angle)
-        print(f"Promień: {R}, Środek: ({h}, {k})")
 
         # Obliczenie kąta początkowego w radianach (od kierunku pojazdu)
         start_angle_rad = start_angle  # zakładamy, że start_angle jest podany w radianach
@@ -299,18 +350,36 @@ class AGV:
         
         # Obliczanie długości łuku
         arc_length = self.calculate_arc_length(start_pos, end_pos, (h, k), R)
-        print(f"Długość łuku: {arc_length}")
 
 
         # Rysowanie okręgu i łuku w Pygame
         rect = pygame.Rect(h - R, k - R, 2 * R, 2 * R)
         pygame.draw.circle(self.screen, (255, 255, 255), (int(h), int(k)), int(R), 2)
-        # pygame.draw.rect(self.screen, (255, 0, 0), rect, 1)
 
-        # Rysowanie łuku - dla pygame używamy wartości od 0 do 1 w normalizowanych współrzędnych kąta
-        # pygame.draw.arc(self.screen, (255, 255, 255), rect, start_angle_rad, end_angle_rad, 2)
-        return arc_length
+        return [arc_length, h, k, R]
 
+
+    def draw_wheel_arc(self, start_pos, end_pos, center, radius):
+        # Obliczanie kąta początkowego i końcowego w radianach
+        start_angle_rad = np.arctan2(start_pos[1] - center[1], start_pos[0] - center[0])
+        end_angle_rad = np.arctan2(end_pos[1] - center[1], end_pos[0] - center[0])
+
+        # Sprawdzanie, czy kąt końcowy jest mniejszy od kąta początkowego
+        if end_angle_rad <= start_angle_rad:
+            end_angle_rad += 2 * np.pi  # Dostosowanie kąta końcowego do pełnego obrotu
+        
+        # Obliczanie długości łuku
+        arc_length = radius * (end_angle_rad - start_angle_rad)
+
+        # Rysowanie okręgu i łuku w Pygame
+        rect = pygame.Rect(center[0] - radius, center[1] - radius, 2 * radius, 2 * radius)
+        pygame.draw.circle(self.screen, (255, 255, 255), (int(center[0]), int(center[1])), int(radius), 2)
+        
+        # Rysowanie łuku - Pygame nie ma funkcji do rysowania łuków, ale możemy to zrobić w sposób bardziej zaawansowany.
+        pygame.draw.arc(self.screen, (255, 255, 255), rect, start_angle_rad, end_angle_rad, 2)
+        
+        return [arc_length, radius]
+    
 
     def analog_move(self):
         if self.analog_keys[0] < -0.3:
@@ -349,21 +418,6 @@ class AGV:
             self.mode = 2
         if keys[pygame.K_d]:
             self.mode = 4
-
-    def fuzzy_move(self, player_angle, player_speed):
-        self.player_angle += player_angle
-        self.player_speed = player_speed
-
-
-    def translate(self, speedL, speedR):
-        speedL = speedL / 2
-        speedR = speedR / 2
-        angle = (speedL - speedR) / 10
-        speed = (speedL + speedR) / 10
-
-        # print(str(speedL) + "  :  " + str(speedR))
-
-        return angle, speed
     
     def caclucate_average(self, lista):
         # Sprawdzamy, czy lista nie jest pusta
@@ -394,10 +448,61 @@ class AGV:
 
 
 
+    def odleglosc(self, p1, p2):
+        return math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
+
+    def kat_centralny(self, p1, p2, r):
+        d = self.odleglosc(p1, p2)
+        return 2 * math.asin(d / (2 * r))
+
+    def dlugosc_luku(self, p1, p2, r):
+        theta = self.kat_centralny(p1, p2, r)
+        return r * theta
+
+    def kat_przeciecia(self, srodek, punkt):
+        x0, y0 = srodek
+        x, y = punkt
+        theta = math.atan2(y - y0, x - x0)
+        return math.degrees(theta)
+    
+    def kat_z_punktu(self, srodek, punkt):
+        x0, y0 = srodek
+        x, y = punkt
+        return math.atan2(y - y0, x - x0)
+
+    def wspolrzedne_punktow(self, srodek, r1, r2, r3, punkt_na_centralnym_okregu):
+
+        # Oblicz kąt theta z punktu na centralnym okręgu
+        theta = self.kat_z_punktu(srodek, punkt_na_centralnym_okregu)
+        
+        x0, y0 = srodek
+        
+        # Współrzędne punktów dla każdego z promieni
+        P1 = (x0 + r1 * math.cos(theta), y0 + r1 * math.sin(theta))
+        P2 = (x0 + r2 * math.cos(theta), y0 + r2 * math.sin(theta))
+        P3 = (x0 + r3 * math.cos(theta), y0 + r3 * math.sin(theta))
+        
+        return P1, P2, P3
+
+    def normalizuj_predkosci(self, v_1, v_2, norm_min=115):
+        v_min = min(v_1, v_2)
+        v_max = max(v_1, v_2)
+        
+        # Znormalizowana prędkość dla mniejszej wartości
+        v_min_norm = norm_min
+        
+        # Znormalizowana prędkość dla większej wartości, proporcjonalnie
+        v_max_norm = norm_min * (v_max / v_min)
+        
+        # Przypisanie znormalizowanych wartości do odpowiednich zmiennych
+        if v_1 == v_min:
+            return v_min_norm, v_max_norm
+        else:
+            return v_max_norm, v_min_norm
+        
+
     def play_step(self):
         self.draw_scene()
-
-        # print(str(self.d1) + " : " + str(self.d2) + " : " + str(self.d3))
 
         original_pos = self.player_pos[:]
         original_angle = self.player_angle
@@ -427,52 +532,104 @@ class AGV:
 
     
 
-        # Fuzzy logic control
-        if self.mode == 2:
-            # print("Rotate")
-            speedL, speedR = self.fuzzy_rotate.compute_action(self.d1, self.d2, self.d3)
-        elif self.mode == 3:
-            # print("Parallel")
-            speedL, speedR = self.fuzzy_parallel.compute_action(self.d1 - self.distance_average, self.d2, self.d3)
-        elif self.mode == 0:
-            speedL = 0
-            speedR = 0
-            self.mode = 1
-        elif self.mode == 1:
-            # print("Logic")
-            speedL, speedR = self.fuzzy_logic.compute_action(self.d1, self.d2, self.d3)
-        else:
-            speedL, speedR = self.fuzzy_dock.compute_action(self.d2 - self.d3, self.d2, self.d3)
+        # # Fuzzy logic control
+        # if self.mode == 2:
+        #     # print("Rotate")
+        #     speedL, speedR = self.fuzzy_rotate.compute_action(self.d1, self.d2, self.d3)
+        # elif self.mode == 3:
+        #     # print("Parallel")
+        #     speedL, speedR = self.fuzzy_parallel.compute_action(self.d1 - self.distance_average, self.d2, self.d3)
+        # elif self.mode == 0:
+        #     speedL = 0
+        #     speedR = 0
+        #     self.mode = 1
+        # elif self.mode == 1:
+        #     # print("Logic")
+        #     speedL, speedR = self.fuzzy_logic.compute_action(self.d1, self.d2, self.d3)
+        # else:
+        #     speedL, speedR = self.fuzzy_dock.compute_action(self.d2 - self.d3, self.d2, self.d3)
 
 
-        angle_action, speed_action = self.translate(speedL, speedR)
-        self.rekord.append([speedL, speedR])
+        # print(str(self.speedL) + " : " + str(self.speedR))
 
-        # self.fuzzy_move(angle_action, speed_action)
+        # self.draw_sensors(self.top_left, self.top_right, self.bottom_left)
+        # if(self.left_wheel == 0 and self.right_wheel == 0):
+        #     self.left_wheel = self.top_left
+        #     self.right_wheel = self.top_right
+        #     self.start_angle = self.player_angle
+        
+        [center_length, x, y, Rc] = self.draw_arc((self.start_pos[0], self.start_pos[1]), self.parking_pos, self.start_angle)
+
+        [left_length, Rl] = self.draw_wheel_arc((self.left_wheel[0], self.left_wheel[1]), self.parking_pos, (x,y), Rc - 150)
+        [right_length, Rr] = self.draw_wheel_arc((self.right_wheel[0], self.right_wheel[1]), self.parking_pos, (x, y), Rc + 150)
+
+
+        print("Pozycja startowa: " + str(self.start_pos[0]) + ' : ' + str(self.start_pos[1]))
+
+        s_P1, s_P2, s_P3 = self.wspolrzedne_punktow((x,y), Rl, Rc, Rr, self.start_pos)
+        # print(f"Punkt startowy na okręgu o promieniu {Rl}: {s_P1}")
+        # print(f"Punkt startowy na okręgu o promieniu {Rc}: {s_P2}")
+        # print(f"Punkt startowy na okręgu o promieniu {Rr}: {s_P3}")
+
+        k_P1, k_P2, k_P3 = self.wspolrzedne_punktow((x,y), Rl, Rc, Rr, self.parking_pos)
+        # print(f"Punkt koncowy na okręgu o promieniu {Rl}: {k_P1}")
+        # print(f"Punkt koncowy na okręgu o promieniu {Rc}: {k_P2}")
+        # print(f"Punkt koncowy na okręgu o promieniu {Rr}: {k_P3}")
+        
+
+        if(self.speedL == 0 and self.speedR == 0):
+
+            # Obliczanie prędkości kół na podstawie promieni
+            # print("new circle")
+
+            speed_L = Rl / 500
+            speed_R = Rr / 500
+            
+            self.speedL = speed_L
+            self.speedR = speed_R
+
+            self.circle_center = [x,y]
+            self.radius_l = Rl
+            self.radius_r = Rr
+
+
+
+        # action_speed = (self.speedL + self.speedR)
+        # action_angle = (self.speedL - self.speedR)
+
+        angle_speed = -0.1
+        self.angle += angle_speed
+        self.player_angle = math.degrees(self.angle)
+        self.player_angle_r = math.degrees(self.angle)
+
+        self.speedL = angle_speed * self.radius_l
+        self.speedR = angle_speed * self.radius_r
+
+
+        # print(str(self.speedL) + " : " + str(self.speedR))
+        norm_right_speed, norm_left_speed = self.normalizuj_predkosci(self.speedL, self.speedR)
+
+        print(str(norm_right_speed) + " : " + str(norm_left_speed))
+        print(str(self.dlugosc_luku(s_P1, k_P1, Rl)) + " : " + str(self.dlugosc_luku(s_P2, k_P2, Rc)) + " : " + str(self.dlugosc_luku(s_P3, k_P3, Rr)))
+        longest_arc = max(self.dlugosc_luku(s_P1, k_P1, Rl), self.dlugosc_luku(s_P2, k_P2, Rc), self.dlugosc_luku(s_P3, k_P3, Rr))
+        print("Czas dziłania: " + str(longest_arc / self.agv_speed) )
+        # print(str(self.kat_przeciecia((x,y), self.parking_pos)))
+        # self.player_angle += action_angle
+        # self.player_speed = action_speed
+
+        # Aktualizacja pozycji prostokąta na podstawie kąta i promienia
+        self.player_pos[0] = self.circle_center[0] + self.radius_l * math.cos(self.angle)
+        self.player_pos[1] = self.circle_center[1] + self.radius_l * math.sin(self.angle)
+
+        self.player_pos_r[0] = self.circle_center[0] + self.radius_r * math.cos(self.angle)
+        self.player_pos_r[1] = self.circle_center[1] + self.radius_r * math.sin(self.angle)
 
         # self.player_pos[0] += self.player_speed * math.sin(math.radians(self.player_angle))
         # self.player_pos[1] -= self.player_speed * math.cos(math.radians(self.player_angle))
 
 
-        self.draw_player()
-
-        self.draw_sensors(self.top_left, self.top_right, self.bottom_left)
-
-        
-        left_wheel = self.top_left
-        right_wheel = self.top_right
-        
-        left_length = self.draw_arc((left_wheel[0], left_wheel[1]), (70, 70), self.player_angle)
-        right_length = self.draw_arc((right_wheel[0], right_wheel[1]), (70, 70), self.player_angle)
-
-        # Renderowanie długości łuku jako tekst
-        text_surface = self.small_font.render(f"Left: {left_length:.2f}", True, (255, 255, 255))
-        text_rect = text_surface.get_rect(center=(self.screen_width - 100, self.screen_height - 300))  # Pozycja nad kołem
-        self.screen.blit(text_surface, text_rect)
-
-        text_surface = self.small_font.render(f"Right: {right_length:.2f}", True, (255, 255, 255))
-        text_rect = text_surface.get_rect(center=(self.screen_width - 100, self.screen_height - 250))  # Pozycja nad kołem
-        self.screen.blit(text_surface, text_rect)
+        self.player_rect = self.draw_player(self.player_pos, self.player_angle, self.top_left, self.top_right, self.bottom_left, self.bottom_right )
+        self.player_rect_r = self.draw_player(self.player_pos_r, self.player_angle_r, self.top_left_r, self.top_right_r, self.bottom_left_r, self.bottom_right_r )
 
         if self.check_collision(self.player_rect, [self.horizontal_wall, self.vertical_wall]):
             self.player_pos = original_pos

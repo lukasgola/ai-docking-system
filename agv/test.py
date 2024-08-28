@@ -22,6 +22,12 @@ class MotorSensorController:
 
         self.rekord = []
 
+        # Określ, przez ile sekund ma działać pętla
+        self.working_time = 10.5  # 10 sekund
+
+        # Zapisz czas rozpoczęcia
+        self.start_time = time.time()
+
         # Inicjalizacja kontrolerów fuzzy
         self.fuzzy_logic = FuzzyLogicController()
         self.fuzzy_rotate = FuzzyRotateLogicController()
@@ -34,26 +40,29 @@ class MotorSensorController:
         right_f = 0xFF
         right_b = 0xFF
 
-        if self.speed_L >= 0:
-            left_f = 255 - (self.speed_L + 80)
-        else:
-            left_b = 255 - (abs(self.speed_L) + 80)
+        # if self.speed_L >= 0:
+        #     left_f = 255 - (self.speed_L + 80)
+        # else:
+        #     left_b = 255 - (abs(self.speed_L) + 80)
 
-        if self.speed_R >= 0:
-            right_f = 255 - (self.speed_R + 80)
-        else:
-            right_b = 255 - (abs(self.speed_R) + 80)
+        # if self.speed_R >= 0:
+        #     right_f = 255 - (self.speed_R + 80)
+        # else:
+        #     right_b = 255 - (abs(self.speed_R) + 80)
 
-        # print(f"{left_b}, {left_f}, {right_b}, {right_f}")
+        # # print(f"{left_b}, {left_f}, {right_b}, {right_f}")
 
-        if left_b > 170:
-            left_b = 255
-        if left_f > 170:
-            left_f = 255
-        if right_b > 170:
-            right_b = 255
-        if right_f > 170:
-            right_f = 255
+        # if left_b > 170:
+        #     left_b = 255
+        # if left_f > 170:
+        #     left_f = 255
+        # if right_b > 170:
+        #     right_b = 255
+        # if right_f > 170:
+        #     right_f = 255
+
+        left_f = 255 - self.speed_L
+        right_f = 255 - self.speed_R
 
 
         message = bytes([int(left_b), int(left_f), int(right_b), int(right_f)])
@@ -112,23 +121,36 @@ class MotorSensorController:
                 speedL, speedR = self.fuzzy_parallel.compute_action(d1 - self.prev_d1, d2, d3)
             
             
-            self.speed_L = speedL
-            self.speed_R = speedR
+            self.speed_L = 95
+            self.speed_R = 115
 
-    def run(self, iterations):
-        for i in range(iterations):
-        # while True:
-            # print(f"Updated speeds: speedL={self.speed_L}, speedR={self.speed_R}")
+    def run(self):
+        while True:
+            # Zapisz czas aktualny
+            current_time = time.time()
+            
+            # Sprawdź, ile czasu minęło od rozpoczęcia
+            elapsed_time = current_time - self.start_time
+            
+            # Jeśli upłynęło więcej czasu niż zadany, przerwij pętlę
+            if elapsed_time > self.working_time:
+                break
+ 
+            print(f"Updated speeds: speedL={self.speed_L}, speedR={self.speed_R}")
             self.send_motor_command()
             self.receive_motor_response()
             self.send_sensor_command()
             d1, d2, d3 = self.receive_sensor_response()
+            # d1 = 0
+            # d2 = 0
+            # d3 = 0
+
             self.update_speeds(d1, d2, d3)
-            time.sleep(0.001)
+            time.sleep(0.01)
         self.client.close()
 
         df = pd.DataFrame(self.rekord, columns=['d1','d2','d3', 'speed_L', 'speed_R'])
-        df.to_excel('sensors4.xlsx')
+        df.to_excel('1_0_1.xlsx')
 
 if __name__ == "__main__":
     mot_host = "192.168.0.101"
@@ -136,5 +158,6 @@ if __name__ == "__main__":
     sen_host = "192.168.0.100"
     sen_port = 4000
 
+
     controller = MotorSensorController(mot_host, mot_port, sen_host, sen_port)
-    controller.run(200)
+    controller.run()
