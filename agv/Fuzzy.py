@@ -6,21 +6,21 @@ import matplotlib.pyplot as plt
 class FuzzyLogicController:
     def __init__(self):
         self.setup_fuzzy_logic()
-        # self.show_plot()
+        self.show_plot()
 
     def setup_fuzzy_logic(self):
         
         # Define fuzzy variables
-        self.dist1 = ctrl.Antecedent(np.arange(0, 5000, 1), 'dist1')
+        self.dist1 = ctrl.Antecedent(np.arange(0, 700, 1), 'dist1')
         self.dist2 = ctrl.Antecedent(np.arange(0, 5000, 1), 'dist2')
         self.dist3 = ctrl.Antecedent(np.arange(0, 5000, 1), 'dist3')
-        self.speedL = ctrl.Consequent(np.arange(-50, 100, 1), 'speedL')
+        self.speedL = ctrl.Consequent(np.arange(-50, 60, 1), 'speedL')
         self.speedR = ctrl.Consequent(np.arange(-50, 100, 1), 'speedR')
 
         # Membership functions for distances
         self.dist1['close'] = fuzz.trapmf(self.dist1.universe, [0, 0, 150, 160])
         self.dist1['ok'] = fuzz.trapmf(self.dist1.universe, [150, 200, 250, 300])
-        self.dist1['far'] = fuzz.trapmf(self.dist1.universe, [250, 300, 4900, 5000])
+        self.dist1['far'] = fuzz.trapmf(self.dist1.universe, [250, 300, 600, 700])
 
         self.dist2['close'] = fuzz.trapmf(self.dist2.universe, [0, 0, 150, 160])
         self.dist2['ok'] = fuzz.trapmf(self.dist2.universe, [150, 200, 250, 300])
@@ -89,37 +89,41 @@ class FuzzyLogicController:
     
     def show_plot(self):
         # Visualize these universes and membership functions
-        fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(8, 6))
+        fig, (ax1) = plt.subplots(nrows=1, figsize=(8, 4))
 
 
-        #ax0.plot(self.dist1.universe, self.dist1['close'].mf, 'b', linewidth=1.5, label='Close')
-        #ax0.plot(self.dist1.universe, self.dist1['ok'].mf, 'g', linewidth=1.5, label='Ok')
-        #ax0.plot(self.dist1.universe, self.dist1['far'].mf, 'r', linewidth=1.5, label='Far')
-        #ax0.set_title('Dist1')
-        #ax0.legend()
+        # ax0.plot(self.dist1.universe, self.dist1['close'].mf, 'b', linewidth=1.5, label='Close')
+        # ax0.plot(self.dist1.universe, self.dist1['ok'].mf, 'g', linewidth=1.5, label='Ok')
+        # ax0.plot(self.dist1.universe, self.dist1['far'].mf, 'r', linewidth=1.5, label='Far')
+        # ax0.set_title('Distances from sensors')
+        # ax0.legend()
 
-        ax1.plot(self.speedL.universe, self.speedL['back'].mf, 'b', linewidth=1.5, label='Back')
-        ax1.plot(self.speedL.universe, self.speedL['stop'].mf, 'g', linewidth=1.5, label='Stop')
-        ax1.plot(self.speedL.universe, self.speedL['slow'].mf, 'r', linewidth=1.5, label='Slow')
-        ax1.plot(self.speedL.universe, self.speedL['fast'].mf, 'orange', linewidth=1.5, label='Fast')
-        ax1.set_title('SpeedL')
+        ax1.plot(self.speedL.universe, self.speedL['back'].mf, 'b', linewidth=1, label='Back')
+        ax1.plot(self.speedL.universe, self.speedL['stop'].mf, 'g', linewidth=1, label='Stop')
+        ax1.plot(self.speedL.universe, self.speedL['slow'].mf, 'r', linewidth=1, label='Slow')
+        ax1.plot(self.speedL.universe, self.speedL['fast'].mf, 'orange', linewidth=1, label='Fast')
+        ax1.set_title('Speeds')
         ax1.legend()
 
-        ax2.plot(self.speedR.universe, self.speedR['back'].mf, 'b', linewidth=1.5, label='Back')
-        ax2.plot(self.speedR.universe, self.speedR['stop'].mf, 'g', linewidth=1.5, label='Stop')
-        ax2.plot(self.speedR.universe, self.speedR['slow'].mf, 'r', linewidth=1.5, label='Slow')
-        ax2.plot(self.speedR.universe, self.speedR['fast'].mf, 'orange', linewidth=1.5, label='Fast')
-        ax2.set_title('SpeedR')
-        ax2.legend()
+        # ax2.plot(self.speedR.universe, self.speedR['back'].mf, 'b', linewidth=1.5, label='Back')
+        # ax2.plot(self.speedR.universe, self.speedR['stop'].mf, 'g', linewidth=1.5, label='Stop')
+        # ax2.plot(self.speedR.universe, self.speedR['slow'].mf, 'r', linewidth=1.5, label='Slow')
+        # ax2.plot(self.speedR.universe, self.speedR['fast'].mf, 'orange', linewidth=1.5, label='Fast')
+        # ax2.set_title('SpeedR')
+        # ax2.legend()
 
         # Turn off top/right axes
-        for ax in (ax1, ax2):
-            ax.spines['top'].set_visible(False)
-            ax.spines['right'].set_visible(False)
-            ax.get_xaxis().tick_bottom()
-            ax.get_yaxis().tick_left()
+        # for ax in (ax0):
+        ax1.spines['top'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
+        ax1.get_xaxis().tick_bottom()
+        ax1.get_yaxis().tick_left()
 
         plt.tight_layout()
         plt.show()  # Display the plot
 
 
+
+
+if __name__ == "__main__":
+    fuzzy = FuzzyLogicController()

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 class FuzzyLogicController:
     def __init__(self):
         self.setup_fuzzy_logic()
-        # self.show_plot()
+        self.show_plot()
 
     def setup_fuzzy_logic(self):
         
