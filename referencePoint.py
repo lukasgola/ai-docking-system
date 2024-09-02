@@ -33,8 +33,8 @@ mean_error_x = np.mean(errors_x)
 mean_error_y = np.mean(errors_y)
 
 # Oblicz odchylenie standardowe błędów
-std_dev_error_x = np.std(errors_x)
-std_dev_error_y = np.std(errors_y)
+std_dev_error_x = np.std(errors_x, ddof=1)
+std_dev_error_y = np.std(errors_y, ddof=1)
 
 # Wyświetl wyniki
 # print(f"Średni błąd względny dla X: {relative_errors_x:.2f}")
@@ -53,7 +53,7 @@ plt.ylim(0, 1000)
 
 plt.scatter(x_coords, y_coords, c='blue', marker='o')
 plt.scatter(x_ref, y_ref, c='red', marker='o')
-plt.title('Reference Point Coords')
+plt.title('Dead Reckoning Algorithm Reference Point Coords')
 plt.xlabel('Xref')
 plt.ylabel('Yref')
 plt.grid(True)
