@@ -40,26 +40,26 @@ class MotorSensorController:
         right_f = 0xFF
         right_b = 0xFF
 
-        # if self.speed_L >= 0:
-        #     left_f = 255 - (self.speed_L + 80)
-        # else:
-        #     left_b = 255 - (abs(self.speed_L) + 80)
+        if self.speed_L >= 0:
+            left_f = 255 - (self.speed_L + 80)
+        else:
+            left_b = 255 - (abs(self.speed_L) + 80)
 
-        # if self.speed_R >= 0:
-        #     right_f = 255 - (self.speed_R + 80)
-        # else:
-        #     right_b = 255 - (abs(self.speed_R) + 80)
+        if self.speed_R >= 0:
+            right_f = 255 - (self.speed_R + 80)
+        else:
+            right_b = 255 - (abs(self.speed_R) + 80)
 
-        # # print(f"{left_b}, {left_f}, {right_b}, {right_f}")
+        # print(f"{left_b}, {left_f}, {right_b}, {right_f}")
 
-        # if left_b > 170:
-        #     left_b = 255
-        # if left_f > 170:
-        #     left_f = 255
-        # if right_b > 170:
-        #     right_b = 255
-        # if right_f > 170:
-        #     right_f = 255
+        if left_b > 170:
+            left_b = 255
+        if left_f > 170:
+            left_f = 255
+        if right_b > 170:
+            right_b = 255
+        if right_f > 170:
+            right_f = 255
 
         left_f = 255 - self.speed_L
         right_f = 255 - self.speed_R
@@ -121,8 +121,8 @@ class MotorSensorController:
                 speedL, speedR = self.fuzzy_parallel.compute_action(d1 - self.prev_d1, d2, d3)
             
             
-            self.speed_L = 95
-            self.speed_R = 115
+            self.speed_L = speedL
+            self.speed_R = speedR
 
     def run(self):
         while True:
@@ -141,10 +141,6 @@ class MotorSensorController:
             self.receive_motor_response()
             self.send_sensor_command()
             d1, d2, d3 = self.receive_sensor_response()
-            # d1 = 0
-            # d2 = 0
-            # d3 = 0
-
             self.update_speeds(d1, d2, d3)
             time.sleep(0.01)
         self.client.close()
