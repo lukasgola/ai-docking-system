@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Wczytaj dane z pliku Excel
-file_path = 'LastMeasurement.xlsx'  # Zmień nazwę pliku, jeśli jest inna
+file_path = 'LastMeasurementsDeadRecon.xlsx'  # Zmień nazwę pliku, jeśli jest inna
 df = pd.read_excel(file_path)
 
 # Sprawdź, jakie kolumny są w pliku
@@ -44,6 +44,10 @@ print(f"Średni błąd bezwzględny dla Y: {mean_error_y:.2f}")
 print(f"Odchylenie standardowe błędów dla X: {std_dev_error_x:.2f}")
 print(f"Odchylenie standardowe błędów dla Y: {std_dev_error_y:.2f}")
 
+# Ustawienia globalne dla Times New Roman i większej czcionki
+plt.rcParams['font.family'] = 'Times New Roman'
+plt.rcParams['font.size'] = 16  # Ustawienie globalnego rozmiaru czcionki
+
 # Tworzenie wykresu
 plt.figure(figsize=(10, 6))
 
@@ -53,8 +57,10 @@ plt.ylim(0, 1000)
 
 plt.scatter(x_coords, y_coords, c='blue', marker='o')
 plt.scatter(x_ref, y_ref, c='red', marker='o')
-plt.title('Dead Reckoning Algorithm Reference Point Coords')
-plt.xlabel('Xref')
-plt.ylabel('Yref')
+plt.title('', fontsize=16)  # Rozmiar czcionki tytułu
+plt.xlabel('Xref', fontsize=16)  # Rozmiar czcionki etykiety osi X
+plt.ylabel('Yref', fontsize=16)  # Rozmiar czcionki etykiety osi Y
+plt.xticks(fontsize=16)  # Rozmiar czcionki etykiet osi X
+plt.yticks(fontsize=16)  # Rozmiar czcionki etykiet osi Y
 plt.grid(True)
 plt.show()
