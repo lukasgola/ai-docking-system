@@ -57,8 +57,8 @@ The AGV system consists of:
 - **Control and Communication**: Python-based algorithms and UDP communication handle real-time navigation and data exchange.
 
 <div align="center">
-  <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture3.png" alt="Description of the image" width="600">
-  <p><em>Figure 1: A descriptive caption for the image</em></p>
+  <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture3.png" alt="Description of the image" width="300">
+  <p><em>Figure 1: AGV Sensors Description</em></p>
 </div>
 
 ---
@@ -73,7 +73,7 @@ The AGV system consists of:
 
 <div align="center">
   <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture6.png" alt="Description of the image" width="600">
-  <p><em>Figure 1: A descriptive caption for the image</em></p>
+  <p><em>Figure 2: Input variables membership functions</em></p>
 </div>
 
 
@@ -82,7 +82,7 @@ The AGV system consists of:
 
 <div align="center">
   <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture7.png" alt="Description of the image" width="600">
-  <p><em>Figure 1: A descriptive caption for the image</em></p>
+  <p><em>Figure 3: Output variables membership functions</em></p>
 </div>
 
 #### Rule Base
@@ -98,7 +98,7 @@ Rules are defined as IF-THEN statements combining sensor data to control AGV mov
 
 <div align="center">
   <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture4.png" alt="Description of the image" width="600">
-  <p><em>Figure 1: A descriptive caption for the image</em></p>
+  <p><em>Figure 4: Fuzzy Logic Algorithm Flow</em></p>
 </div>
 
 ### Dead Reckoning Algorithm Flow
@@ -108,7 +108,7 @@ Rules are defined as IF-THEN statements combining sensor data to control AGV mov
 
 <div align="center">
   <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture9.png" alt="Description of the image" width="600">
-  <p><em>Figure 1: A descriptive caption for the image</em></p>
+  <p><em>Figure 5: Dead Reckoning Algorithm Flow</em></p>
 </div>
 
 ---
@@ -124,7 +124,7 @@ The experiments were conducted in a controlled L-shaped environment with four st
 
 <div align="center">
   <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture10.png" alt="Description of the image" width="600">
-  <p><em>Figure 1: A descriptive caption for the image</em></p>
+  <p><em>Figure 6: Testing environment</em></p>
 </div>
 
 Starting angles included -30°, 0°, and 30°, with three trials per configuration. The target docking point was (350 mm, 350 mm).
@@ -144,7 +144,7 @@ Starting angles included -30°, 0°, and 30°, with three trials per configurati
 
 <div align="center">
   <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture11.png" alt="Description of the image" width="600">
-  <p><em>Figure 1: A descriptive caption for the image</em></p>
+  <p><em>Figure 7: Docking result for Fuzzy Logic</em></p>
 </div>
 
 #### Dead Reckoning Results
@@ -156,7 +156,7 @@ Starting angles included -30°, 0°, and 30°, with three trials per configurati
 
 <div align="center">
   <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture12.png" alt="Description of the image" width="600">
-  <p><em>Figure 1: A descriptive caption for the image</em></p>
+  <p><em>Figure 8: Docking result for Dead Reckoning</em></p>
 </div>
 
 ---
