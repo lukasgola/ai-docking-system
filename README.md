@@ -56,6 +56,11 @@ The AGV system consists of:
 - **Power Supply**: 9V, 2A laboratory power source.  
 - **Control and Communication**: Python-based algorithms and UDP communication handle real-time navigation and data exchange.
 
+<div align="center">
+  <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture3.png" alt="Description of the image" width="600">
+  <p><em>Figure 1: A descriptive caption for the image</em></p>
+</div>
+
 ---
 
 ## Implementation Details
@@ -64,10 +69,21 @@ The AGV system consists of:
 #### Membership Functions
 - **Input Variables**:  
   - *Distances*: Classified as “Close,” “OK,” and “Far” based on trapezoidal membership functions.  
-  - *Difference in Readings*: Indicates AGV's deviation from the optimal path.  
+  - *Difference in Readings*: Indicates AGV's deviation from the optimal path.
+
+<div align="center">
+  <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture6.png" alt="Description of the image" width="600">
+  <p><em>Figure 1: A descriptive caption for the image</em></p>
+</div>
+
 
 - **Output Variables**:  
-  - *Motor Speeds*: Adjustments classified as “Back,” “Stop,” “Slow,” or “Fast.”  
+  - *Motor Speeds*: Adjustments classified as “Back,” “Stop,” “Slow,” or “Fast.”
+
+<div align="center">
+  <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture7.png" alt="Description of the image" width="600">
+  <p><em>Figure 1: A descriptive caption for the image</em></p>
+</div>
 
 #### Rule Base
 Rules are defined as IF-THEN statements combining sensor data to control AGV movements. For example:
@@ -88,7 +104,12 @@ Rules are defined as IF-THEN statements combining sensor data to control AGV mov
 ### Dead Reckoning Algorithm Flow
 1. **Circle Calculation**: Determines optimal arcs for AGV movement.  
 2. **Wheel Speed Adjustment**: Maintains proportional speeds for inner and outer wheels.  
-3. **Stopping Condition**: Calculates travel time based on arc lengths and velocities.  
+3. **Stopping Condition**: Calculates travel time based on arc lengths and velocities.
+
+<div align="center">
+  <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture9.png" alt="Description of the image" width="600">
+  <p><em>Figure 1: A descriptive caption for the image</em></p>
+</div>
 
 ---
 
@@ -100,6 +121,11 @@ The experiments were conducted in a controlled L-shaped environment with four st
 - SP2: (900 mm, 2450 mm)  
 - SP3: (1200 mm, 2450 mm)  
 - SP4: (1500 mm, 2450 mm)
+
+<div align="center">
+  <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture10.png" alt="Description of the image" width="600">
+  <p><em>Figure 1: A descriptive caption for the image</em></p>
+</div>
 
 Starting angles included -30°, 0°, and 30°, with three trials per configuration. The target docking point was (350 mm, 350 mm).
 
@@ -116,12 +142,22 @@ Starting angles included -30°, 0°, and 30°, with three trials per configurati
   - Angle: 6°  
 - **Standard Deviations**: Lower across all metrics compared to Dead Reckoning.
 
+<div align="center">
+  <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture11.png" alt="Description of the image" width="600">
+  <p><em>Figure 1: A descriptive caption for the image</em></p>
+</div>
+
 #### Dead Reckoning Results
 - **Mean Errors**:  
   - X-axis: 134 mm  
   - Y-axis: 124 mm  
   - Angle: 39°  
 - **Observations**: Higher variability and greater dependency on initial conditions.
+
+<div align="center">
+  <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture12.png" alt="Description of the image" width="600">
+  <p><em>Figure 1: A descriptive caption for the image</em></p>
+</div>
 
 ---
 
