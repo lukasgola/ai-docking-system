@@ -73,14 +73,19 @@ The AGV system consists of:
 Rules are defined as IF-THEN statements combining sensor data to control AGV movements. For example:
 - If the distance to the left wall is “Close” and the front sensor reads “Far,” then adjust speed to “Slow.”
 
-#### Process Flow
+#### Fuzzy Logic Algorithm Flow
 1. **Initialization**: Activates sensors and initializes the fuzzy controller.  
 2. **Data Collection**: Gathers real-time sensor inputs.  
 3. **Decision Making**: Applies fuzzy rules to determine the next action.  
 4. **Movement Adjustment**: Controls motor speeds to navigate closer to the docking point.  
 5. **Iteration**: Continuously repeats until docking is achieved.
 
-### Dead Reckoning Algorithm
+<div align="center">
+  <img src="https://github.com/lukasgola/ai-docking-system/blob/main/images/Picture4.png" alt="Description of the image" width="600">
+  <p><em>Figure 1: A descriptive caption for the image</em></p>
+</div>
+
+### Dead Reckoning Algorithm Flow
 1. **Circle Calculation**: Determines optimal arcs for AGV movement.  
 2. **Wheel Speed Adjustment**: Maintains proportional speeds for inner and outer wheels.  
 3. **Stopping Condition**: Calculates travel time based on arc lengths and velocities.  
