@@ -1,2 +1,8 @@
 # Ignore the myenv directory
 myenv/
+
+# Ignore the .DS_Store file
+.DS_Store
+
+# Ignore the .env file
+.env
