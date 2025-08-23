@@ -92,9 +92,9 @@ class FuzzyLogicController:
         fig, (ax1) = plt.subplots(nrows=1, figsize=(8, 4))
 
 
-        # ax0.plot(self.dist1.universe, self.dist1['close'].mf, 'b', linewidth=1.5, label='Close')
-        # ax0.plot(self.dist1.universe, self.dist1['ok'].mf, 'g', linewidth=1.5, label='Ok')
-        # ax0.plot(self.dist1.universe, self.dist1['far'].mf, 'r', linewidth=1.5, label='Far')
+        # ax1.plot(self.dist2.universe, self.dist2['close'].mf, 'b', linewidth=1.5, label='Close')
+        # ax1.plot(self.dist2.universe, self.dist2['ok'].mf, 'g', linewidth=1.5, label='Ok')
+        # ax1.plot(self.dist2.universe, self.dist2['far'].mf, 'r', linewidth=1.5, label='Far')
         # ax0.set_title('Distances from sensors')
         # ax0.legend()
 
@@ -103,6 +103,8 @@ class FuzzyLogicController:
         ax1.plot(self.speedL.universe, self.speedL['slow'].mf, 'r', linewidth=1, label='Slow')
         ax1.plot(self.speedL.universe, self.speedL['fast'].mf, 'orange', linewidth=1, label='Fast')
         ax1.set_title('Speeds')
+        ax1.set_xlabel('Speed Value')
+        ax1.set_ylabel('μ(x) - Membership Degree')
         ax1.legend()
 
         # ax2.plot(self.speedR.universe, self.speedR['back'].mf, 'b', linewidth=1.5, label='Back')
